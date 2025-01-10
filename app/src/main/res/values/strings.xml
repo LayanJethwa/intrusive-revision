@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Intrusive Revision</string>
+    <string name="correct_text">Correct!</string>
+    <string name="incorrect_text">Incorrect</string>
+    <string name="switch_text">Session</string>
+    <string name="global_text">Global</string>
+    <string name="stats_text">| Stats |</string>
+    <string name="question_text">This question</string>
+    <string name="equals_text">=</string>
+</resources>

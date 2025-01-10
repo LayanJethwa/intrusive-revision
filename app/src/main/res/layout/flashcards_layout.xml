@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/marginTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.04" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/marginLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.04" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/marginRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.96" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/addSet"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:boxBackgroundColor="@color/dark_grey"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:endIconDrawable="@drawable/enter"
+            app:endIconMode="custom"
+            app:endIconTint="@color/highlight"
+            app:endIconTintMode="src_atop"
+            app:layout_constraintEnd_toStartOf="@+id/marginRight"
+            app:layout_constraintStart_toStartOf="@+id/marginLeft"
+            app:layout_constraintTop_toTopOf="@+id/marginTop">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/addSetText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Paste Quizlet link (must be on 1st card):"
+                android:textColor="@color/light_text" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/currentSetText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Current set:"
+            android:textColor="@color/light_text"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/marginLeft"
+            app:layout_constraintTop_toBottomOf="@+id/addSet" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/currentSet"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            app:cardBackgroundColor="@color/light_grey"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toStartOf="@+id/marginRight"
+            app:layout_constraintStart_toStartOf="@+id/marginLeft"
+            app:layout_constraintTop_toBottomOf="@+id/currentSetText">
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/setTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/currentSet"
+            app:layout_constraintEnd_toStartOf="@+id/marginSetTitles"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/currentSet"
+            app:layout_constraintTop_toTopOf="@+id/currentSet"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintWidth_max="wrap" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/termChip"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="-4dp"
+            android:textColor="@color/light_text"
+            android:textSize="12sp"
+            app:chipBackgroundColor="@color/dark_grey"
+            app:layout_constraintBottom_toBottomOf="@+id/currentSet"
+            app:layout_constraintStart_toStartOf="@+id/currentSet"
+            app:textEndPadding="4dp"
+            app:textStartPadding="4dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/dateChip"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="-4dp"
+            android:textColor="@color/light_text"
+            android:textSize="12sp"
+            app:chipBackgroundColor="@color/dark_grey"
+            app:layout_constraintBottom_toBottomOf="@+id/currentSet"
+            app:layout_constraintStart_toEndOf="@+id/termChip"
+            app:textEndPadding="4dp"
+            app:textStartPadding="4dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/tickChip"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="-4dp"
+            android:textColor="@color/light_text"
+            android:textSize="12sp"
+            app:chipBackgroundColor="@color/dark_grey"
+            app:chipIcon="@drawable/tick"
+            app:chipIconSize="12dp"
+            app:layout_constraintBottom_toBottomOf="@+id/currentSet"
+            app:layout_constraintStart_toEndOf="@+id/dateChip"
+            app:textEndPadding="4dp"
+            app:textStartPadding="4dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/crossChip"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="-4dp"
+            android:textColor="@color/light_text"
+            android:textSize="12sp"
+            app:chipBackgroundColor="@color/dark_grey"
+            app:chipIcon="@drawable/cross"
+            app:chipIconSize="12dp"
+            app:layout_constraintBottom_toBottomOf="@+id/currentSet"
+            app:layout_constraintStart_toEndOf="@+id/tickChip"
+            app:textEndPadding="4dp"
+            app:textStartPadding="4dp" />
+
+        <ImageButton
+            android:id="@+id/binButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="@+id/currentSet"
+            app:layout_constraintEnd_toEndOf="@+id/currentSet"
+            app:srcCompat="@drawable/bin"
+            app:tint="@color/red" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/marginSetTitles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.75" />
+
+        <ImageButton
+            android:id="@+id/renameButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="@+id/setTitle"
+            app:layout_constraintStart_toEndOf="@+id/setTitle"
+            app:layout_constraintTop_toTopOf="@+id/setTitle"
+            app:srcCompat="@drawable/rename"
+            app:tint="@color/black" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
