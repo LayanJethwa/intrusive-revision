@@ -37,6 +37,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
 #### Set management ####
 - Rename set
 - Swap terms and definitions
+- Allow for selection of multiple sets
     
 #### Intrusive settings ####
 - Per app and global choices
@@ -45,6 +46,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - Penalty for incorrect answers
 
 ### Polishes ###
+- App icon
 - Icons for swipe bar
 - Animations and glow
 - Global/session stats switch colour

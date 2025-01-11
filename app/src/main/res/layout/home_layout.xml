@@ -88,50 +88,6 @@
         app:layout_constraintStart_toStartOf="@+id/questionField"
         app:layout_constraintTop_toTopOf="@+id/questionField" />
 
-    <ImageView
-        android:id="@+id/tickLeft"
-        android:contentDescription="@null"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="@+id/marginLeft"
-        app:layout_constraintTop_toBottomOf="@+id/statsSwitch"
-        app:srcCompat="@drawable/tick" />
-
-    <ImageView
-        android:id="@+id/tickRight"
-        android:contentDescription="@null"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="4dp"
-        app:layout_constraintEnd_toStartOf="@+id/marginRight"
-        app:layout_constraintTop_toBottomOf="@+id/statsSwitch"
-        app:srcCompat="@drawable/tick" />
-
-    <ImageView
-        android:id="@+id/crossLeft"
-        android:contentDescription="@null"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="@+id/marginLeft"
-        app:layout_constraintTop_toBottomOf="@+id/tickLeft"
-        app:srcCompat="@drawable/cross" />
-
-    <ImageView
-        android:id="@+id/crossRight"
-        android:contentDescription="@null"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="4dp"
-        app:layout_constraintEnd_toStartOf="@+id/marginRight"
-        app:layout_constraintTop_toBottomOf="@+id/tickRight"
-        app:srcCompat="@drawable/cross" />
-
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/marginTop"
         android:layout_width="wrap_content"
@@ -237,50 +193,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.8" />
 
-    <TextView
-        android:id="@+id/tickLeftNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="999"
-        android:textColor="@color/light_text"
-        app:layout_constraintBottom_toBottomOf="@+id/tickLeft"
-        app:layout_constraintStart_toEndOf="@+id/tickLeft"
-        app:layout_constraintTop_toTopOf="@+id/tickLeft" />
-
-    <TextView
-        android:id="@+id/crossLeftNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="999"
-        android:textColor="@color/light_text"
-        app:layout_constraintBottom_toBottomOf="@+id/crossLeft"
-        app:layout_constraintStart_toEndOf="@+id/crossLeft"
-        app:layout_constraintTop_toTopOf="@+id/crossLeft" />
-
-    <TextView
-        android:id="@+id/tickRightNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="999"
-        android:textColor="@color/light_text"
-        app:layout_constraintBottom_toBottomOf="@+id/tickRight"
-        app:layout_constraintEnd_toStartOf="@+id/tickRight"
-        app:layout_constraintTop_toTopOf="@+id/tickRight" />
-
-    <TextView
-        android:id="@+id/crossRightNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="999"
-        android:textColor="@color/light_text"
-        app:layout_constraintBottom_toBottomOf="@+id/crossRight"
-        app:layout_constraintEnd_toStartOf="@+id/crossRight"
-        app:layout_constraintTop_toTopOf="@+id/crossRight" />
-
     <androidx.cardview.widget.CardView
         android:id="@+id/validate"
         android:layout_width="0dp"
@@ -351,5 +263,68 @@
         app:layout_constraintEnd_toStartOf="@+id/marginRightMid"
         app:layout_constraintStart_toStartOf="@+id/marginLeftMid"
         app:layout_constraintTop_toTopOf="@+id/termText" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/tickLeftChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="999"
+        android:textColor="@color/light_text"
+        app:chipBackgroundColor="@color/dark_grey"
+        app:chipIcon="@drawable/tick"
+        app:chipIconSize="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/marginLeftValidate"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toBottomOf="@+id/statsSwitch"
+        app:textEndPadding="4dp"
+        app:textStartPadding="4dp" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/crossLeftChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="999"
+        android:textColor="@color/light_text"
+        app:chipBackgroundColor="@color/dark_grey"
+        app:chipIcon="@drawable/cross"
+        app:chipIconSize="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/marginLeftValidate"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toBottomOf="@+id/tickLeftChip"
+        app:textEndPadding="4dp"
+        app:textStartPadding="4dp" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/tickRightChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="999"
+        android:textColor="@color/light_text"
+        app:chipBackgroundColor="@color/dark_grey"
+        app:chipIcon="@drawable/tick"
+        app:chipIconSize="16dp"
+        app:closeIcon="@drawable/tick"
+        app:layout_constraintBottom_toTopOf="@+id/crossRightChip"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintStart_toStartOf="@+id/marginRightValidate"
+        app:layout_constraintTop_toTopOf="@+id/tickLeftChip"
+        app:textEndPadding="4dp"
+        app:textStartPadding="4dp" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/crossRightChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="999"
+        android:textColor="@color/light_text"
+        app:chipBackgroundColor="@color/dark_grey"
+        app:chipIcon="@drawable/cross"
+        app:chipIconSize="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintStart_toStartOf="@+id/marginRightValidate"
+        app:layout_constraintTop_toBottomOf="@+id/tickRightChip"
+        app:textEndPadding="4dp"
+        app:textStartPadding="4dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
