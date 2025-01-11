@@ -339,23 +339,31 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             myBinButton?.setOnClickListener {
                 File(context?.filesDir, setFileName).delete()
 
+                val changeCardConstraintParams = ConstraintSet()
+                changeCardConstraintParams.clone(layout)
+
+                layout.removeView(myCard)
+                layout.removeView(mySetTitle)
+                layout.removeView(myTermChip)
+                layout.removeView(myDateChip)
+                layout.removeView(myTickChip)
+                layout.removeView(myCrossChip)
+                layout.removeView(myBinButton)
+                layout.removeView(myRenameButton)
+
                 if (myCard == sets.last() && myCard != sets.first()) {
-                    cardConstraintParams.clear(sets[sets.size-2].id, ConstraintSet.TOP)
-                    cardConstraintParams.clear(myCard.id, ConstraintSet.TOP)
-                    cardConstraintParams.connect(sets[sets.size-2].id, ConstraintSet.TOP, R.id.currentSet, ConstraintSet.BOTTOM)
-                    cardConstraintParams.setMargin(sets[sets.size-2].id, ConstraintSet.TOP, dpToPx(32).toInt())
-                    sets.remove(myCard)
+                    val cardChanged = sets[sets.size-2]
+                    changeCardConstraintParams.clear(cardChanged.id, ConstraintSet.TOP)
+                    changeCardConstraintParams.connect(cardChanged.id, ConstraintSet.TOP, R.id.currentSet, ConstraintSet.BOTTOM)
+                    changeCardConstraintParams.setMargin(cardChanged.id, ConstraintSet.TOP, dpToPx(32).toInt())
                 } else if (myCard != sets.first()) {
                     val delIndex = sets.indexOf(myCard)
-                    cardConstraintParams.clear(sets[delIndex].id, ConstraintSet.TOP)
-                    cardConstraintParams.clear(sets[delIndex-1].id, ConstraintSet.TOP)
-                    cardConstraintParams.connect(sets[delIndex-1].id, ConstraintSet.TOP, sets[delIndex+1].id, ConstraintSet.BOTTOM)
-                    cardConstraintParams.setMargin(sets[delIndex-1].id, ConstraintSet.TOP, dpToPx(8).toInt())
-                    sets.remove(myCard)
-                } else if (myCard == sets.last() && myCard == sets.first()) {
-                    cardConstraintParams.clear(myCard.id, ConstraintSet.TOP)
-                    sets.remove(myCard)
+                    changeCardConstraintParams.clear(sets[delIndex-1].id, ConstraintSet.TOP)
+                    changeCardConstraintParams.connect(sets[delIndex-1].id, ConstraintSet.TOP, sets[delIndex+1].id, ConstraintSet.BOTTOM)
+                    changeCardConstraintParams.setMargin(sets[delIndex-1].id, ConstraintSet.TOP, dpToPx(8).toInt())
                 }
+
+                sets.remove(myCard)
 
                 if (mySetTitle?.text == currentSetTitle.text) {
                     currentSetTitle.text = ""
@@ -369,14 +377,8 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                     }
                 }
 
-                layout.removeView(myCard)
-                layout.removeView(mySetTitle)
-                layout.removeView(myTermChip)
-                layout.removeView(myDateChip)
-                layout.removeView(myTickChip)
-                layout.removeView(myCrossChip)
-                layout.removeView(myBinButton)
-                layout.removeView(myRenameButton)
+                changeCardConstraintParams.applyTo(layout)
+                layout.requestLayout()
             }
 
             cardConstraintParams.applyTo(layout)
