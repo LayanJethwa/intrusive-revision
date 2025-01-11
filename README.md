@@ -26,7 +26,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
 
 ### High priority ###
 
-- Fix display bug upon set deletion
+- ~~Fix display bug upon set deletion~~ [DONE]
 
 ### Features ###
 #### Statistics ####
