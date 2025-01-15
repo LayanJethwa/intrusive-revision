@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.intrusiverevision"
+    namespace = "com.layanjethwa.intrusiverevision"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.intrusiverevision"
+        applicationId = "com.layanjethwa.intrusiverevision"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

@@ -5,6 +5,7 @@
     <string name="switch_text">Session</string>
     <string name="global_text">Global</string>
     <string name="stats_text">| Stats |</string>
-    <string name="question_text">This question</string>
+    <string name="question_text">Current question</string>
     <string name="equals_text">=</string>
+    <string name="zero_text">0</string>
 </resources>

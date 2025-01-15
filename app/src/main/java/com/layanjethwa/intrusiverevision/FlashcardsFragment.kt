@@ -1,34 +1,24 @@
-package com.example.intrusiverevision
+package com.layanjethwa.intrusiverevision
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources.getSystem
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.TextUtils
-import android.util.DisplayMetrics
 import android.util.TypedValue
-import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBar.LayoutParams
-import androidx.appcompat.widget.AppCompatImageButton
-import androidx.cardview.widget.CardView
-import androidx.compose.ui.graphics.Color
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColorInt
 import androidx.core.os.bundleOf
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import com.layanjethwa.intrusiverevision.R
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
@@ -59,6 +49,8 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
         val sets = mutableListOf<MaterialCardView>()
 
+        val settings = this.activity?.getSharedPreferences("setsStats", 0)
+
         fun dpToPx(dp: Int): Float {
             return (dp * getSystem().displayMetrics.density)
         }
@@ -81,11 +73,11 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             val date = "$day/$month/$year"
 
             requireActivity().runOnUiThread {
-                currentSetTitle.text = setData[1]
+                currentSetTitle.text = setData[1].replace(".txt","")
                 currentSetDate.text = date
                 currentSetTerms.text = "$currentTermCount terms"
-                currentSetTick.text = setData[2]
-                currentSetCross.text = setData[3].replace(".txt","")
+                currentSetTick.text = settings?.getInt("${setData[0]}--${setData[1]}--ticks",0).toString()
+                currentSetCross.text = settings?.getInt("${setData[0]}--${setData[1]}--crosses",0).toString()
                 currentSetTitle.requestLayout()
                 currentSetRename.requestLayout()
                 layout.requestLayout()
@@ -127,7 +119,9 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             binButtonLayoutParams.setMargins(0,0,dpToPx(8).toInt(),dpToPx(8).toInt())
             renameButtonLayoutParams.setMargins(dpToPx(8).toInt(),0,0,0)
 
-            myCard?.setCardBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.light_grey))
+            myCard?.setCardBackgroundColor(ContextCompat.getColor(requireActivity(),
+                R.color.light_grey
+            ))
             myCard?.radius = dpToPx(16)
             myCard?.elevation = 0F
 
@@ -181,8 +175,11 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             mySetTitle?.text = title
             myTermChip?.text = numTermsText
             myDateChip?.text = date
-            myTickChip?.text = "0"
-            myCrossChip?.text = "0"
+
+            val fileFormatDate = date.split("/").reversed().joinToString()
+
+            myTickChip?.text = settings?.getInt("${fileFormatDate}--$title--ticks",0).toString()
+            myCrossChip?.text = settings?.getInt("${fileFormatDate}--$title--crosses",0).toString()
 
             myCard?.layoutParams = cardLayoutParams
             mySetTitle?.layoutParams = setTitleLayoutParams
@@ -227,15 +224,18 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             cardConstraintParams.clone(layout)
 
 
-            myCard?.id?.let { cardConstraintParams.connect(it, ConstraintSet.END, R.id.marginRight, ConstraintSet.START) }
-            myCard?.id?.let { cardConstraintParams.connect(it, ConstraintSet.START, R.id.marginLeft, ConstraintSet.START) }
+            myCard?.id?.let { cardConstraintParams.connect(it, ConstraintSet.END,
+                R.id.marginRight, ConstraintSet.START) }
+            myCard?.id?.let { cardConstraintParams.connect(it, ConstraintSet.START,
+                R.id.marginLeft, ConstraintSet.START) }
 
 
             mySetTitle?.id?.let { myCard?.id?.let { it1 ->
                 cardConstraintParams.connect(it, ConstraintSet.BOTTOM,
                     it1, ConstraintSet.BOTTOM)
             } }
-            mySetTitle?.id?.let { cardConstraintParams.connect(it, ConstraintSet.END, R.id.marginSetTitles, ConstraintSet.START)}
+            mySetTitle?.id?.let { cardConstraintParams.connect(it, ConstraintSet.END,
+                R.id.marginSetTitles, ConstraintSet.START)}
             mySetTitle?.id?.let { myCard?.id?.let { it1 ->
                 cardConstraintParams.connect(it, ConstraintSet.START,
                     it1, ConstraintSet.START)
@@ -354,7 +354,8 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                 if (myCard == sets.last() && myCard != sets.first()) {
                     val cardChanged = sets[sets.size-2]
                     changeCardConstraintParams.clear(cardChanged.id, ConstraintSet.TOP)
-                    changeCardConstraintParams.connect(cardChanged.id, ConstraintSet.TOP, R.id.currentSet, ConstraintSet.BOTTOM)
+                    changeCardConstraintParams.connect(cardChanged.id, ConstraintSet.TOP,
+                        R.id.currentSet, ConstraintSet.BOTTOM)
                     changeCardConstraintParams.setMargin(cardChanged.id, ConstraintSet.TOP, dpToPx(32).toInt())
                 } else if (myCard != sets.first()) {
                     val delIndex = sets.indexOf(myCard)
@@ -429,14 +430,14 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                     terms = (cards.toList().size/2).toInt()
                     var counter = 0
 
-                    val file = File(context?.filesDir, "$fileDate--$title--0--0.txt")
+                    val file = File(context?.filesDir, "$fileDate--$title.txt")
                     if (file.exists()) {
                         file.delete()
                     }
 
                     if (cards.toList().size > 1) {
                         activity?.applicationContext?.openFileOutput(
-                            "$fileDate--$title--0--0.txt",
+                            "$fileDate--$title.txt",
                             Context.MODE_PRIVATE
                         )
                             .use {
@@ -457,14 +458,15 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                             }
 
                         requireActivity().runOnUiThread {
-                            addCard(date, title, terms, "$fileDate--$title--0--0.txt", border = true)
+                            addCard(date, title, terms, "$fileDate--$title.txt", border = true)
                             Toast.makeText(
                                 activity?.applicationContext,
                                 "Set initialised",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
-                        setCurrentSet("$fileDate--$title--0--0.txt")
+
+                        setCurrentSet("$fileDate--$title.txt")
                     } else {
                         requireActivity().runOnUiThread {
                             Toast.makeText(
@@ -529,7 +531,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                     borderInit = true
                 }
 
-                addCard(date, fileData[1], termCount, fileNameInit, border = borderInit)
+                addCard(date, fileData[1].replace(".txt",""), termCount, fileNameInit, border = borderInit)
             }
         }
 

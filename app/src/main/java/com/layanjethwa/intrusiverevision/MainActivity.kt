@@ -1,12 +1,10 @@
-package com.example.intrusiverevision
+package com.layanjethwa.intrusiverevision
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.intrusiverevision.databinding.LayoutBinding
+import com.layanjethwa.intrusiverevision.databinding.LayoutBinding
 import com.google.android.material.tabs.TabLayoutMediator
-import org.jsoup.Jsoup
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: LayoutBinding
