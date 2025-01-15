@@ -176,7 +176,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             myTermChip?.text = numTermsText
             myDateChip?.text = date
 
-            val fileFormatDate = date.split("/").reversed().joinToString()
+            val fileFormatDate = date.split("/").reversed().joinToString(separator = "")
 
             myTickChip?.text = settings?.getInt("${fileFormatDate}--$title--ticks",0).toString()
             myCrossChip?.text = settings?.getInt("${fileFormatDate}--$title--crosses",0).toString()

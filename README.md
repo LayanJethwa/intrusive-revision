@@ -20,6 +20,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - Quizlet set scraper (capped at 100 cards for now)
 - Dynamic view for flashcard management
 - Simple multiple-choice view to blitz through questions
+- View local and global statistics for all sets, as well as per question
 
 
 ## Roadmap
@@ -30,9 +31,9 @@ The current release has been quickly hacked together to meet a deadline, so may 
 
 ### Features ###
 #### Statistics ####
-- Per session
-- Per set, all-time
-- Per question, all-time
+- ~~Per session~~ [DONE]
+- ~~Per set, all-time~~ [DONE]
+- ~~Per question, all-time~~ [DONE]
 
 #### Set management ####
 - Rename set
