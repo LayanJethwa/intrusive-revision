@@ -34,7 +34,8 @@ import java.util.prefs.Preferences
 class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
     private val sets = mutableListOf<MaterialCardView>()
-    private val cardGraphics = mutableMapOf<MaterialCardView, MutableList<Any>>()
+    private val cardGraphics = mutableMapOf<MaterialCardView, MutableList<Chip>>()
+    private val setFileNames = mutableMapOf<MaterialCardView, String>()
     private lateinit var layout : ConstraintLayout
     private var currentSetFileNameInit = ""
     private var currentSetFileName = ""
@@ -77,8 +78,8 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             currentSetTitle.text = setData[1].replace(".txt","")
             currentSetDate.text = date
             currentSetTerms.text = "$currentTermCount terms"
-            currentSetTick.text = settings?.getInt("${setData[0]}--${setData[1]}--ticks",0).toString()
-            currentSetCross.text = settings?.getInt("${setData[0]}--${setData[1]}--crosses",0).toString()
+            currentSetTick.text = settings?.getInt("${set.replace(".txt","")}--ticks",0).toString()
+            currentSetCross.text = settings?.getInt("${set.replace(".txt","")}--crosses",0).toString()
             currentSetTitle.requestLayout()
             currentSetRename.requestLayout()
             layout.requestLayout()
@@ -338,7 +339,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         }
 
         if (myCard != null && mySetTitle != null && myTermChip != null && myDateChip != null && myTickChip != null && myCrossChip != null && myBinButton != null && myRenameButton != null) {
-            cardGraphics[myCard] = mutableListOf(mySetTitle,myTermChip,myDateChip,myTickChip,myCrossChip,myBinButton,myRenameButton)
+            cardGraphics[myCard] = mutableListOf(myTickChip,myCrossChip)
         }
 
         myBinButton?.setOnClickListener {
@@ -370,6 +371,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             }
 
             sets.remove(myCard)
+            setFileNames.remove(myCard)
 
             if (mySetTitle?.text == currentSetTitle.text) {
                 currentSetTitle.text = ""
@@ -392,6 +394,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
         if (myCard != null) {
             sets.add(myCard)
+            setFileNames[myCard] = setFileName
         }
 
     }
@@ -567,47 +570,13 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
     override fun onResume() {
         super.onResume()
         resumeCount ++
-        val setsTemp = sets.toMutableList()
-        val iterationSetsTemp = sets.toMutableList()
         if (resumeCount > 1) {
-            for (card in iterationSetsTemp) {
-                sets.remove(card)
-                setsTemp.remove(card)
-                layout.removeView(card)
-                for (graphic in cardGraphics[card]!!) {
-                    layout.removeView(graphic as View?)
-                }
-
-                if (setsTemp.size == 0) {
-                    val files = activity?.filesDir?.listFiles()
-                    files?.sortWith { text1, text2 ->
-                        text1.compareTo(text2)
-                    }
-                    files?.forEach {
-                        if ("-" in it.toString()) {
-                            val fileNameInit = it.toString().split("/").last()
-                            val fileData = fileNameInit.split("--")
-                            var termCount = 0
-                            context?.openFileInput(fileNameInit).use { stream ->
-                                termCount = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n").size
-                            }
-                            val day = fileData[0].slice(4..5)
-                            val month = fileData[0].slice(2..3)
-                            val year = fileData[0].slice(0..1)
-                            val date = "$day/$month/$year"
-
-                            var borderInit = false
-                            if (fileNameInit == currentSetFileName) {
-                                borderInit = true
-                            }
-
-                            addCard(date, fileData[1].replace(".txt",""), termCount, fileNameInit, border = borderInit)
-                        }
-                    }
-                }
+            for (card in sets) {
+                cardGraphics[card]?.get(0)?.text = settings?.getInt("${setFileNames[card]?.replace(".txt","")}--ticks",0).toString()
+                cardGraphics[card]?.get(1)?.text = settings?.getInt("${setFileNames[card]?.replace(".txt","")}--crosses",0).toString()
             }
-
+            currentSetTick.text = settings?.getInt("${currentSetFileName.replace(".txt","")}--ticks",0).toString()
+            currentSetCross.text = settings?.getInt("${currentSetFileName.replace(".txt","")}--crosses",0).toString()
         }
-
     }
 }
