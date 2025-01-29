@@ -5,7 +5,13 @@
     <string name="switch_text">Session</string>
     <string name="global_text">Global</string>
     <string name="stats_text">| Stats |</string>
-    <string name="question_text">Current question</string>
+    <string name="question_text">Previous question</string>
     <string name="equals_text">=</string>
     <string name="zero_text">0</string>
+    <string name="checkbox_text">Show questions based on your past stats</string>
+
+    <string name="settings1">Display</string>
+    <string name="settings2">new question(s) every</string>
+    <string name="settings3">minute(s), with a penalty of</string>
+    <string name="settings4">question(s) for each incorrect answer</string>
 </resources>

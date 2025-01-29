@@ -21,6 +21,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - Dynamic view for flashcard management
 - Simple multiple-choice view to blitz through questions
 - View local and global statistics for all sets, as well as per question
+- Option to show questions based on previous statistics
 
 
 ## Roadmap
@@ -36,6 +37,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - ~~Per question, all-time~~ [DONE]
 
 #### Set management ####
+- ~~Spaced retrieval~~ [DONE]
 - Rename set
 - Swap terms and definitions
 - Allow for selection of multiple sets
@@ -45,6 +47,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - Number of questions to show
 - Frequency to show questions again
 - Penalty for incorrect answers
+- Counter for questions left to unlock close button
 
 ### Polishes ###
 - App icon

@@ -1,73 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/appCard"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="40dp"
+    android:layout_marginBottom="16dp"
+    app:cardBackgroundColor="@color/dark_grey"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp">
+
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/marginTop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.04" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/marginLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.04" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/marginRight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.96" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/globalSettings"
-            android:layout_width="0dp"
-            android:layout_height="25dp"
-            app:cardBackgroundColor="@color/dark_grey"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:layout_constraintEnd_toStartOf="@+id/marginRight"
-            app:layout_constraintStart_toStartOf="@+id/marginLeft"
-            app:layout_constraintTop_toTopOf="@+id/marginTop">
-
-        </com.google.android.material.card.MaterialCardView>
+        <ImageView
+            android:id="@+id/appIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/cross" />
 
         <TextView
-            android:id="@+id/globalText"
+            android:id="@+id/appTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginEnd="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="TextView"
+            android:textColor="@color/highlight"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/appChevron"
+            app:layout_constraintStart_toEndOf="@+id/appIcon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/appChevron"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="1dp"
-            android:text="Global settings"
-            android:textColor="@color/highlight"
-            app:layout_constraintStart_toStartOf="@+id/globalSettings"
-            app:layout_constraintTop_toTopOf="@+id/marginTop" />
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_arrow_drop_down_24"
+            app:tint="@color/highlight" />
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/globalTextGroup"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="40dp"
             android:layout_marginEnd="8dp"
             android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/globalSettings"
-            app:layout_constraintEnd_toStartOf="@+id/marginRight"
-            app:layout_constraintStart_toStartOf="@+id/marginLeft"
-            app:layout_constraintTop_toTopOf="@id/globalSettings">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="NotSibling">
 
             <TextView
                 android:id="@+id/displayText"
@@ -80,10 +78,10 @@
 
             <EditText
                 android:id="@+id/newQuestions"
-                android:inputType="number"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:layout_marginStart="4dp"
+                android:inputType="number"
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
@@ -100,10 +98,10 @@
 
             <EditText
                 android:id="@+id/timeInterval"
-                android:inputType="number"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:layout_marginStart="4dp"
+                android:inputType="number"
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
@@ -120,10 +118,10 @@
 
             <EditText
                 android:id="@+id/penaltyQuestions"
-                android:inputType="number"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:layout_marginStart="4dp"
+                android:inputType="number"
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
@@ -139,29 +137,5 @@
                 android:textSize="18sp" />
 
         </com.google.android.material.chip.ChipGroup>
-
-        <ImageView
-            android:id="@+id/collapseChevron"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:layout_marginEnd="4dp"
-            android:scaleX="1.5"
-            android:scaleY="1.5"
-            app:layout_constraintEnd_toStartOf="@+id/marginRight"
-            app:layout_constraintTop_toTopOf="@+id/globalSettings"
-            app:srcCompat="@drawable/baseline_arrow_drop_down_24"
-            app:tint="@color/highlight" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/marginRight"
-            app:layout_constraintStart_toStartOf="@+id/marginLeft"
-            app:layout_constraintTop_toBottomOf="@+id/globalSettings" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+</com.google.android.material.card.MaterialCardView>

@@ -20,7 +20,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
-import com.layanjethwa.intrusiverevision.R
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
@@ -29,7 +28,6 @@ import org.jsoup.Jsoup
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.prefs.Preferences
 
 class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
@@ -55,6 +53,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         return (dp * getSystem().displayMetrics.density)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setCurrentSet(set: String) {
         setFragmentResult("currentSet", bundleOf("currentSet" to set))
         activity?.applicationContext?.openFileOutput("currentSet.txt", Context.MODE_PRIVATE).use {
@@ -65,7 +64,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
         val setData = set.split("--")
 
-        var currentTermCount = 0
+        var currentTermCount: Int
         context?.openFileInput(set).use { stream ->
             currentTermCount = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n").size
         }
@@ -78,14 +77,15 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             currentSetTitle.text = setData[1].replace(".txt","")
             currentSetDate.text = date
             currentSetTerms.text = "$currentTermCount terms"
-            currentSetTick.text = settings?.getInt("${set.replace(".txt","")}--ticks",0).toString()
-            currentSetCross.text = settings?.getInt("${set.replace(".txt","")}--crosses",0).toString()
+            currentSetTick.text = settings.getInt("${set.replace(".txt","")}--ticks",0).toString()
+            currentSetCross.text = settings.getInt("${set.replace(".txt","")}--crosses",0).toString()
             currentSetTitle.requestLayout()
             currentSetRename.requestLayout()
             layout.requestLayout()
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun addCard(date: String, title: String, terms: Int, setFileName: String, border: Boolean = false) {
         val myCard = context?.let { MaterialCardView(it) }
         val mySetTitle = context?.let{ TextView(it) }
@@ -180,8 +180,8 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
         val fileFormatDate = date.split("/").reversed().joinToString(separator = "")
 
-        myTickChip?.text = settings?.getInt("${fileFormatDate}--$title--ticks",0).toString()
-        myCrossChip?.text = settings?.getInt("${fileFormatDate}--$title--crosses",0).toString()
+        myTickChip?.text = settings.getInt("${fileFormatDate}--$title--ticks",0).toString()
+        myCrossChip?.text = settings.getInt("${fileFormatDate}--$title--crosses",0).toString()
 
         myCard?.layoutParams = cardLayoutParams
         mySetTitle?.layoutParams = setTitleLayoutParams
@@ -428,22 +428,22 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                     Toast.LENGTH_LONG
                 ).show()
             }
-            var date = ""
-            var title = ""
-            var terms = 0
+            var date: String
+            var title: String
+            var terms: Int
             val fileRead = Thread {
                 val url = inputText.text.toString()
-                var doc: String
-                try {
-                    doc = Jsoup.connect(url)
+                val doc: String = try {
+                    Jsoup.connect(url)
                         .maxBodySize(0)
                         .timeout(0)
                         .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0")
                         .get().toString()
                 } catch (e: Exception) {
-                    doc = "ERROR"
+                    "ERROR"
                 }
 
+                @SuppressLint("SimpleDateFormat")
                 if (doc != "ERROR") {
                     requireActivity().runOnUiThread {
                         Toast.makeText(
@@ -456,7 +456,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                     title = Regex("""<title>(.+?) Flashcards""").findAll(doc).toList()[0].groups[1]?.value.toString()
                     date = SimpleDateFormat("dd/MM/yy").format(Calendar.getInstance().time).toString()
                     val fileDate = SimpleDateFormat("yyMMdd").format(Calendar.getInstance().time).toString()
-                    terms = (cards.toList().size/2).toInt()
+                    terms = (cards.toList().size/2)
                     var counter = 0
 
                     val file = File(context?.filesDir, "$fileDate--$title.txt")
@@ -541,11 +541,11 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         files?.sortWith { text1, text2 ->
             text1.compareTo(text2)
         }
-        files?.forEach {
+        files?.forEach { it ->
             if ("-" in it.toString()) {
                 val fileNameInit = it.toString().split("/").last()
                 val fileData = fileNameInit.split("--")
-                var termCount = 0
+                var termCount: Int
                 context?.openFileInput(fileNameInit).use { stream ->
                     termCount = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n").size
                 }
@@ -567,16 +567,21 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         return fragmentView
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onResume() {
         super.onResume()
         resumeCount ++
         if (resumeCount > 1) {
             for (card in sets) {
-                cardGraphics[card]?.get(0)?.text = settings?.getInt("${setFileNames[card]?.replace(".txt","")}--ticks",0).toString()
-                cardGraphics[card]?.get(1)?.text = settings?.getInt("${setFileNames[card]?.replace(".txt","")}--crosses",0).toString()
+                cardGraphics[card]?.get(0)?.text = settings.getInt("${setFileNames[card]?.replace(".txt","")}--ticks",0)
+                    .toString()
+                cardGraphics[card]?.get(1)?.text = settings.getInt("${setFileNames[card]?.replace(".txt","")}--crosses",0)
+                    .toString()
             }
-            currentSetTick.text = settings?.getInt("${currentSetFileName.replace(".txt","")}--ticks",0).toString()
-            currentSetCross.text = settings?.getInt("${currentSetFileName.replace(".txt","")}--crosses",0).toString()
+            currentSetTick.text = settings.getInt("${currentSetFileName.replace(".txt","")}--ticks",0)
+                .toString()
+            currentSetCross.text = settings.getInt("${currentSetFileName.replace(".txt","")}--crosses",0)
+                .toString()
         }
     }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -15,7 +16,8 @@
         app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintEnd_toStartOf="@+id/marginLeftMid"
         app:layout_constraintStart_toStartOf="@+id/marginLeft"
-        app:layout_constraintTop_toTopOf="@+id/marginTopAnswers" />
+        app:layout_constraintTop_toTopOf="@+id/marginTopAnswers"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonTopRight"
@@ -28,7 +30,8 @@
         app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintEnd_toStartOf="@+id/marginRight"
         app:layout_constraintStart_toStartOf="@+id/marginRightMid"
-        app:layout_constraintTop_toTopOf="@+id/marginTopAnswers" />
+        app:layout_constraintTop_toTopOf="@+id/marginTopAnswers"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonBottomLeft"
@@ -42,7 +45,8 @@
         app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintEnd_toStartOf="@+id/marginLeftMid"
         app:layout_constraintStart_toStartOf="@+id/marginLeft"
-        app:layout_constraintTop_toBottomOf="@+id/buttonTopLeft" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonTopLeft"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonBottomRight"
@@ -56,7 +60,8 @@
         app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintEnd_toStartOf="@+id/marginRight"
         app:layout_constraintStart_toStartOf="@+id/marginRightMid"
-        app:layout_constraintTop_toBottomOf="@+id/buttonTopRight" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonTopRight"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/questionField"
@@ -69,7 +74,9 @@
         app:layout_constraintBottom_toTopOf="@+id/marginQuestion"
         app:layout_constraintEnd_toStartOf="@+id/marginRight"
         app:layout_constraintStart_toStartOf="@+id/marginLeft"
-        app:layout_constraintTop_toTopOf="@+id/marginTop" />
+        app:layout_constraintTop_toTopOf="@+id/marginTop" >
+
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/questionText"
@@ -85,6 +92,18 @@
         app:layout_constraintBottom_toBottomOf="@+id/questionField"
         app:layout_constraintEnd_toEndOf="@+id/questionField"
         app:layout_constraintStart_toStartOf="@+id/questionField"
+        app:layout_constraintTop_toTopOf="@+id/questionField" />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/checkbox_text"
+        android:textColor="@color/light_text"
+        app:checkedState="checked"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
         app:layout_constraintTop_toTopOf="@+id/questionField" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -150,7 +169,6 @@
         android:id="@+id/statsGlobal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:text="@string/global_text"
         android:textColor="@color/light_text"
         app:layout_constraintBottom_toBottomOf="@+id/statsSwitch"
@@ -279,7 +297,8 @@
         app:layout_constraintStart_toStartOf="@+id/marginLeft"
         app:layout_constraintTop_toBottomOf="@+id/statsSwitch"
         app:textEndPadding="2dp"
-        app:textStartPadding="4dp" />
+        app:textStartPadding="4dp"
+        tools:ignore="DuplicateSpeakableTextCheck" />
 
     <com.google.android.material.chip.Chip
         android:id="@+id/crossLeftChip"

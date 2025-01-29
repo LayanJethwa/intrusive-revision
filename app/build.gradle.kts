@@ -58,7 +58,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.viewpager2)
-    implementation("org.jsoup:jsoup:1.14.3")
+    implementation(libs.jsoup)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

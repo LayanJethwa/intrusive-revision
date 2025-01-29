@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
@@ -14,8 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import com.google.android.material.chip.Chip
 import java.io.File
+import kotlin.random.Random
 
-@Suppress("NAME_SHADOWING")
 class HomeFragment : Fragment(R.layout.home_layout) {
 
     private var currentSet = "NONE"
@@ -45,8 +46,12 @@ class HomeFragment : Fragment(R.layout.home_layout) {
     private var editor = settings?.edit()
 
     private var statsType = "session"
+    private var questionType = "spaced"
+    private val allCorrectScore = 0.1F
+    private val allIncorrectScore = 10F
+    private val newQuestionScore = 5F
 
-    private fun nextQuestion(term: String, ans: String): List<String> {
+    private fun nextQuestion(ans: String): List<String> {
         if (currentSet == "NONE") {
             Toast.makeText(
                 activity?.applicationContext,
@@ -55,21 +60,63 @@ class HomeFragment : Fragment(R.layout.home_layout) {
             ).show()
             return listOf("NONE", "NONE")
         } else {
-            var term: String
-            var answer: String
+            var term = ""
+            var answer = ""
 
-            var question = flashcards.random().split("||")
-            term = question[0]
-            answer = question[1]
+            if (questionType == "random") {
 
-            tickRightChip.text = settings?.getInt("${currentSet.replace(".txt","--ticks")}--${term}--${answer}",0).toString()
-            crossRightChip.text = settings?.getInt("${currentSet.replace(".txt","--crosses")}--${term}--${answer}",0).toString()
-
-            while (("$term||$ans" in flashcards) || (term == "")) {
-                question = flashcards.random().split("||")
+                var question = flashcards.random().split("||")
                 term = question[0]
                 answer = question[1]
+
+                while (("$term||$ans" in flashcards) || (term == "")) {
+                    question = flashcards.random().split("||")
+                    term = question[0]
+                    answer = question[1]
+                }
+            } else {
+                val ratios = mutableListOf<Float>()
+                for (card in flashcards) {
+                    val ticks = settings?.getInt("${currentSet.replace(".txt","--ticks")}--${card.replace("||","--")}",0)?.toFloat()
+                    val crosses = settings?.getInt("${currentSet.replace(".txt","--crosses")}--${card.replace("||","--")}",0)?.toFloat()
+                    if (crosses == 0F) {
+                        if (ticks != 0F) {
+                            ratios.add(allCorrectScore / ticks!!)
+                        } else {
+                            ratios.add(newQuestionScore)
+                        }
+                    } else if (ticks == 0F) {
+                        if (crosses != 0F) {
+                            ratios.add(allIncorrectScore)
+                        } else {
+                            ratios.add(newQuestionScore)
+                        }
+                    } else {
+                        ratios.add(crosses!! / ticks!!)
+                    }
+                }
+                val sumRatios = ratios.sum()
+                val newRatios = ratios.map { it / sumRatios}
+                var currentScore = 0F
+                val cumulativeRatios = mutableListOf<Float>()
+                for (ratio in newRatios) {
+                    currentScore += ratio
+                    cumulativeRatios.add(currentScore)
+                }
+
+                while (("$term||$ans" in flashcards) || (term == "")) {
+                    val randomScore = Random.nextFloat()
+                    var currentCard = 0
+
+                    while (randomScore > cumulativeRatios[currentCard]) {
+                        currentCard++
+                    }
+                    val question = flashcards[currentCard].split("||")
+                    term = question[0]
+                    answer = question[1]
+                }
             }
+
             val answers = mutableListOf(answer)
             var newAns = answer
             for (i in 1..3) {
@@ -108,11 +155,11 @@ class HomeFragment : Fragment(R.layout.home_layout) {
         settings = this.activity?.getSharedPreferences("setsStats", 0)
         editor = settings?.edit()
 
-        setFragmentResultListener("currentSet") { requestKey, bundle ->
+        setFragmentResultListener("currentSet") { _, bundle ->
             currentSet = bundle.getString("currentSet").toString()
             context?.openFileInput(currentSet).use { stream ->
                 flashcards = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n")
-                fullQuestion = nextQuestion("NONE", "NONE")
+                fullQuestion = nextQuestion("NONE")
                 currentTerm = fullQuestion[0]
                 currentDef = fullQuestion[1]
                 sessionTicks = 0
@@ -171,6 +218,7 @@ class HomeFragment : Fragment(R.layout.home_layout) {
         tickRightChip = fragmentView.findViewById(R.id.tickRightChip)
         crossRightChip = fragmentView.findViewById(R.id.crossRightChip)
         val statsSwitch: SwitchCompat = fragmentView.findViewById(R.id.statsSwitch)
+        val checkBox: CheckBox = fragmentView.findViewById(R.id.checkBox)
 
         @SuppressLint("SetTextI18n")
         fun validateInput(expected: String, clicked: String, term: String) {
@@ -226,6 +274,8 @@ class HomeFragment : Fragment(R.layout.home_layout) {
                     }
 
                 }
+                tickRightChip.text = settings?.getInt("${currentSet.replace(".txt","--ticks")}--${term}--${expected}",0).toString()
+                crossRightChip.text = settings?.getInt("${currentSet.replace(".txt","--crosses")}--${term}--${expected}",0).toString()
                 termText.text = term
                 definitionText.text = expected
                 equalsText.text = getString(R.string.equals_text)
@@ -234,35 +284,35 @@ class HomeFragment : Fragment(R.layout.home_layout) {
 
 
 
-        fullQuestion = nextQuestion("NONE", "NONE")
+        fullQuestion = nextQuestion("NONE")
         currentTerm = fullQuestion[0]
         currentDef = fullQuestion[1]
 
         buttonTopLeft.setOnClickListener {
             validateInput(currentDef, buttonTopLeft.text.toString(), currentTerm)
-            fullQuestion = nextQuestion(currentTerm, currentDef)
+            fullQuestion = nextQuestion(currentDef)
             currentTerm = fullQuestion[0]
             currentDef = fullQuestion[1]
         }
         buttonTopRight.setOnClickListener {
             validateInput(currentDef, buttonTopRight.text.toString(), currentTerm)
-            fullQuestion = nextQuestion(currentTerm, currentDef)
+            fullQuestion = nextQuestion(currentDef)
             currentTerm = fullQuestion[0]
             currentDef = fullQuestion[1]
         }
         buttonBottomLeft.setOnClickListener {
             validateInput(currentDef, buttonBottomLeft.text.toString(), currentTerm)
-            fullQuestion = nextQuestion(currentTerm, currentDef)
+            fullQuestion = nextQuestion(currentDef)
             currentTerm = fullQuestion[0]
             currentDef = fullQuestion[1]
         }
         buttonBottomRight.setOnClickListener {
             validateInput(currentDef, buttonBottomRight.text.toString(), currentTerm)
-            fullQuestion = nextQuestion(currentTerm, currentDef)
+            fullQuestion = nextQuestion(currentDef)
             currentTerm = fullQuestion[0]
             currentDef = fullQuestion[1]
         }
-        statsSwitch.setOnCheckedChangeListener({ _, isChecked ->
+        statsSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 statsType = "global"
                 tickLeftChip.text = globalTicks.toString()
@@ -272,7 +322,14 @@ class HomeFragment : Fragment(R.layout.home_layout) {
                 tickLeftChip.text = sessionTicks.toString()
                 crossLeftChip.text = sessionCrosses.toString()
             }
-        })
+        }
+        checkBox.setOnCheckedChangeListener { _, isChecked ->
+            questionType = if (isChecked) {
+                "spaced"
+            } else {
+                "random"
+            }
+        }
 
         return fragmentView
     }
