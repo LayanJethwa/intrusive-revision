@@ -23,6 +23,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - View local and global statistics for all sets, as well as per question
 - Option to show questions based on previous statistics
 - Intrusive settings
+  - Starts on phone boot
   - You can select the number of questions, the penalty for incorrect answers, and the time interval between popups
   - You will be served popups globally across the entire phone at the specified time interval
 
