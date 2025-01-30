@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="1dp"
-            android:text="Global settings"
+            android:text="@string/global_settings_text"
             android:textColor="@color/highlight"
             app:layout_constraintStart_toStartOf="@+id/globalSettings"
             app:layout_constraintTop_toTopOf="@+id/marginTop" />
@@ -87,6 +87,7 @@
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
+                android:imeOptions="actionDone"
                 android:text="@string/zero_text" />
 
             <TextView
@@ -107,6 +108,7 @@
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
+                android:imeOptions="actionDone"
                 android:text="@string/zero_text" />
 
             <TextView
@@ -127,6 +129,7 @@
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
+                android:imeOptions="actionDone"
                 android:text="@string/zero_text" />
 
             <TextView

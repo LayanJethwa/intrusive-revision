@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonTopLeft"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:textAllCaps="false"
+        android:textSize="20sp"
+        app:backgroundTint="@color/light_grey"
+        app:cornerRadius="30dp"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintEnd_toStartOf="@+id/marginLeftMid"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toTopOf="@+id/marginTopAnswers"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonTopRight"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:textAllCaps="false"
+        android:textSize="20sp"
+        app:backgroundTint="@color/light_grey"
+        app:cornerRadius="30dp"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintStart_toStartOf="@+id/marginRightMid"
+        app:layout_constraintTop_toTopOf="@+id/marginTopAnswers"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonBottomLeft"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="2dp"
+        android:textAllCaps="false"
+        android:textSize="20sp"
+        app:backgroundTint="@color/light_grey"
+        app:cornerRadius="30dp"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintEnd_toStartOf="@+id/marginLeftMid"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toBottomOf="@+id/buttonTopLeft"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonBottomRight"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="2dp"
+        android:textAllCaps="false"
+        android:textSize="20sp"
+        app:backgroundTint="@color/light_grey"
+        app:cornerRadius="30dp"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintStart_toStartOf="@+id/marginRightMid"
+        app:layout_constraintTop_toBottomOf="@+id/buttonTopRight"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/questionField"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        app:cardBackgroundColor="@color/dark_grey"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/marginQuestion"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toTopOf="@+id/marginTop" >
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/questionText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="#00FF0000"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textSize="24sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@+id/questionField"
+        app:layout_constraintEnd_toEndOf="@+id/questionField"
+        app:layout_constraintStart_toStartOf="@+id/questionField"
+        app:layout_constraintTop_toTopOf="@+id/questionField" />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/checkbox_text"
+        android:textColor="@color/light_text"
+        app:checkedState="checked"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toTopOf="@+id/questionField" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.04" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.04" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.96" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.28" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginTopAnswers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.29" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginLeftMid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.49" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginRightMid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.51" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/statsSwitch"
+        android:layout_width="99dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="@string/switch_text"
+        android:textColor="@color/light_text"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toBottomOf="@+id/buttonBottomLeft" />
+
+    <TextView
+        android:id="@+id/statsGlobal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/global_text"
+        android:textColor="@color/light_text"
+        app:layout_constraintBottom_toBottomOf="@+id/statsSwitch"
+        app:layout_constraintStart_toEndOf="@+id/statsSwitch"
+        app:layout_constraintTop_toBottomOf="@+id/buttonBottomLeft" />
+
+    <TextView
+        android:id="@+id/stats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stats_text"
+        android:textColor="@color/light_text"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@+id/statsSwitch"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toTopOf="@+id/statsSwitch" />
+
+    <TextView
+        android:id="@+id/statsQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:text="@string/question_text"
+        android:textColor="@color/light_text"
+        app:layout_constraintBottom_toBottomOf="@+id/statsSwitch"
+        app:layout_constraintEnd_toStartOf="@+id/marginRight"
+        app:layout_constraintTop_toTopOf="@+id/statsSwitch" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginLeftValidate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.2" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/marginRightValidate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.8" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/validate"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="@color/dark_grey"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/marginRightValidate"
+        app:layout_constraintStart_toStartOf="@+id/marginLeftValidate"
+        app:layout_constraintTop_toBottomOf="@+id/stats"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/validateText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:textSize="24sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toTopOf="@+id/termText"
+        app:layout_constraintEnd_toEndOf="@+id/validate"
+        app:layout_constraintStart_toStartOf="@+id/validate"
+        app:layout_constraintTop_toTopOf="@+id/validate" />
+
+    <TextView
+        android:id="@+id/termText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="start"
+        android:maxLines="3"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/validate"
+        app:layout_constraintEnd_toStartOf="@+id/marginLeftMid"
+        app:layout_constraintStart_toStartOf="@+id/validate" />
+
+    <TextView
+        android:id="@+id/definitionText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="end"
+        android:maxLines="3"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/validate"
+        app:layout_constraintEnd_toStartOf="@+id/marginRightValidate"
+        app:layout_constraintStart_toStartOf="@+id/marginRightMid" />
+
+    <TextView
+        android:id="@+id/equalsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center|center_horizontal"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@+id/termText"
+        app:layout_constraintEnd_toStartOf="@+id/marginRightMid"
+        app:layout_constraintStart_toStartOf="@+id/marginLeftMid"
+        app:layout_constraintTop_toTopOf="@+id/termText" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/tickLeftChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/zero_text"
+        android:textColor="@color/light_text"
+        app:chipBackgroundColor="@color/dark_grey"
+        app:chipIcon="@drawable/tick"
+        app:chipIconSize="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/marginLeftValidate"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toBottomOf="@+id/statsSwitch"
+        app:textEndPadding="2dp"
+        app:textStartPadding="4dp"
+        tools:ignore="DuplicateSpeakableTextCheck" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/crossLeftChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/zero_text"
+        android:textColor="@color/light_text"
+        app:chipBackgroundColor="@color/dark_grey"
+        app:chipIcon="@drawable/cross"
+        app:chipIconSize="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/marginLeftValidate"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toBottomOf="@+id/tickLeftChip"
+        app:textEndPadding="2dp"
+        app:textStartPadding="4dp" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/tickRightChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layoutDirection="rtl"
+        android:text="@string/zero_text"
+        android:textColor="@color/light_text"
+        app:chipBackgroundColor="@color/dark_grey"
+        app:chipIcon="@drawable/tick"
+        app:chipIconSize="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/marginRightValidate"
+        app:layout_constraintStart_toStartOf="@+id/marginRight"
+        app:layout_constraintTop_toTopOf="@+id/tickLeftChip"
+        app:textEndPadding="2dp"
+        app:textStartPadding="4dp" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/crossRightChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layoutDirection="rtl"
+        android:text="@string/zero_text"
+        android:textColor="@color/light_text"
+        app:chipBackgroundColor="@color/dark_grey"
+        app:chipIcon="@drawable/cross"
+        app:chipIconSize="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/marginRightValidate"
+        app:layout_constraintStart_toStartOf="@+id/marginRight"
+        app:layout_constraintTop_toBottomOf="@+id/tickRightChip"
+        app:textEndPadding="2dp"
+        app:textStartPadding="4dp" />
+
+    <TextView
+        android:id="@+id/scoreText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_marginBottom="18dp"
+        android:textColor="@color/highlight"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@+id/questionField"
+        app:layout_constraintStart_toStartOf="@+id/questionField" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/closeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="8dp"
+        android:enabled="false"
+        android:insetLeft="2dp"
+        android:insetTop="8dp"
+        android:insetRight="2dp"
+        android:insetBottom="8dp"
+        android:text="@string/close_text"
+        android:textColor="@color/dark_grey"
+        app:backgroundTint="@color/light_grey"
+        app:layout_constraintBottom_toBottomOf="@+id/questionField"
+        app:layout_constraintEnd_toEndOf="@+id/questionField" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

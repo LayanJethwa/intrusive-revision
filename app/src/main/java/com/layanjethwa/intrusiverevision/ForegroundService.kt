@@ -4,11 +4,16 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStatsManager
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import java.util.Timer
@@ -20,9 +25,18 @@ class ForegroundService : Service() {
     private lateinit var timer: Timer
     private lateinit var timerTask: TimerTask
     private val handler = Handler(Looper.getMainLooper())
+    private var systemApps: MutableList<String> = mutableListOf("com.layanjethwa.intrusiverevision","android")
 
     override fun onCreate() {
         super.onCreate()
+
+        val appInfos = packageManager.getInstalledApplications( PackageManager.GET_META_DATA )
+        for ( appInfo in appInfos ) {
+            if (appInfo.flags == ApplicationInfo.FLAG_SYSTEM) {
+                systemApps.add(appInfo.packageName)
+            }
+        }
+
         getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",false).apply()
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             startMyOwnForeground()
@@ -38,17 +52,69 @@ class ForegroundService : Service() {
                 handler.post {
                     window = Window(context = applicationContext)
                     window.open()
-                    getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
+                    getSharedPreferences("appRunning", 0).edit()
+                        .putBoolean("serviceActive", true).apply()
                 }
             }
         }
-        val interval: Long = getSharedPreferences("globalSettings",0).getInt("timeInterval",0).toLong()
-        if (!getSharedPreferences("appRunning",0).getBoolean("serviceActive", false) &&
-            !getSharedPreferences("appRunning",0).getBoolean("isActive", false) &&
+        val checkApps = object : TimerTask() {
+            override fun run() {
+                val usageStatsManager =
+                    applicationContext.getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
+                val currentTime = System.currentTimeMillis()
+                val usageEvents = usageStatsManager.queryEvents(currentTime - 1000, currentTime)
+                val usageEvent = UsageEvents.Event()
+
+                while (usageEvents.hasNextEvent()) {
+                    usageEvents.getNextEvent(usageEvent)
+                    val id = usageEvent.packageName
+                    if (id !in systemApps && usageEvent.eventType in mutableListOf(1,19)) {
+                        getSharedPreferences("appRunning",0).edit().putString("currentApp", id).apply()
+                        Log.e("APP", "$id ${usageEvent.eventType}")
+                        if (getSharedPreferences(id, 0).getInt(
+                                "timeInterval",
+                                0
+                            ) != 0
+                            && getSharedPreferences(
+                                id,
+                                0
+                            ).getInt("newQuestions", 0) != 0
+                        ) {
+
+                            val appTimerTask = object : TimerTask() {
+                                override fun run() {
+                                    handler.post {
+                                        window = Window(context = applicationContext)
+                                        window.open(id)
+                                        getSharedPreferences("appRunning", 0).edit()
+                                            .putBoolean("serviceActive", true).apply()
+                                    }
+                                }
+                            }
+
+                            Timer().schedule(
+                                appTimerTask,
+                                getSharedPreferences(
+                                    id,
+                                    0
+                                ).getInt("timeInterval", 0).toLong()
+                            )
+
+                        }
+                    }
+                }
+            }
+        }
+        val interval: Long =
+            getSharedPreferences("globalSettings", 0).getInt("timeInterval", 0).toLong()
+        if (!getSharedPreferences("appRunning", 0).getBoolean("serviceActive", false) &&
+            !getSharedPreferences("appRunning", 0).getBoolean("isActive", false) &&
             interval > 0
         ) {
-            Timer().schedule(timerTask, interval*1000*60)
+            Timer().schedule(timerTask, interval * 1000 * 60)
         }
+
+        Timer().schedule(checkApps, 0, 2000)
         return START_STICKY
     }
 

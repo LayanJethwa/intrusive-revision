@@ -117,11 +117,12 @@ class SettingsFragment: Fragment(R.layout.settings_layout) {
                 dataList.add(
                     Model(
                         info.activityInfo.applicationInfo.loadLabel(packageManager).toString(),
-                        info.activityInfo.loadIcon(packageManager)
+                        info.activityInfo.loadIcon(packageManager),
+                        info.activityInfo.packageName
                     )
                 )
             }
-            val rvAdapter = RvAdapter(dataList)
+            val rvAdapter = RvAdapter(dataList, requireContext())
             requireActivity().runOnUiThread {
                 recyclerView.adapter = rvAdapter
             }

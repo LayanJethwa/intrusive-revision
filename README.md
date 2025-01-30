@@ -26,6 +26,7 @@ The current release has been quickly hacked together to meet a deadline, so may 
   - Starts on phone boot
   - You can select the number of questions, the penalty for incorrect answers, and the time interval between popups
   - You will be served popups globally across the entire phone at the specified time interval
+  - You can also select the above parameters for specific apps
 
 
 ## Roadmap
@@ -47,12 +48,12 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - Allow for selection of multiple sets
     
 #### Intrusive settings ####
-- Per app choices
+- ~~Per app choices~~ [DONE]
 - ~~Global choices~~ [DONE]
-- Number of questions to show
-- Frequency to show questions again
-- Penalty for incorrect answers
-- Counter for questions left to unlock close button
+- ~~Number of questions to show~~ [DONE]
+- ~~Frequency to show questions again~~ [DONE]
+- ~~Penalty for incorrect answers~~ [DONE]
+- ~~Counter for questions left to unlock close button~~ [DONE]
 
 ### Polishes ###
 - App icon

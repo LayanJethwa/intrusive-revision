@@ -3,6 +3,7 @@ package com.layanjethwa.intrusiverevision
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Context.WINDOW_SERVICE
+import android.content.res.ColorStateList
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
@@ -19,6 +20,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import java.io.File
 import java.util.Timer
@@ -64,6 +66,9 @@ class Window(
     private var statsSwitch: SwitchCompat
     private var checkBox: CheckBox
 
+    private var scoreText: TextView
+    private var closeButton: MaterialButton
+
     private var sessionTicks = 0
     private var sessionCrosses = 0
     private var globalTicks = 0
@@ -83,6 +88,8 @@ class Window(
     private var newQuestions: Int = 0
     private var penaltyQuestions: Int = 0
 
+    private var settingsType: String = "globalSettings"
+
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mParams = WindowManager.LayoutParams(
@@ -96,7 +103,7 @@ class Window(
         context.setTheme(R.style.Theme_IntrusiveRevision)
         layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-        mView = layoutInflater.inflate(R.layout.home_layout, null)
+        mView = layoutInflater.inflate(R.layout.popup_layout, null)
 
         buttonTopLeft = mView.findViewById(R.id.buttonTopLeft)
         buttonTopRight = mView.findViewById(R.id.buttonTopRight)
@@ -116,6 +123,10 @@ class Window(
         crossRightChip = mView.findViewById(R.id.crossRightChip)
         statsSwitch = mView.findViewById(R.id.statsSwitch)
         checkBox = mView.findViewById(R.id.checkBox)
+
+        scoreText = mView.findViewById(R.id.scoreText)
+        closeButton = mView.findViewById(R.id.closeButton)
+
 
         val currentSetFile = File(context.filesDir?.path, "currentSet.txt")
         if (currentSetFile.exists()) {
@@ -182,11 +193,34 @@ class Window(
             }
         }
 
+        closeButton.setOnClickListener {
+            val handler = Handler(Looper.getMainLooper())
+            val timerTask = object : TimerTask() {
+                override fun run() {
+                    handler.post {
+                        val window = Window(context = context)
+                        window.open(settingsType)
+                        context.getSharedPreferences("appRunning", 0).edit()
+                            .putBoolean("serviceActive", true).apply()
+                    }
+                }
+            }
+
+            if (closeButton.isEnabled) {
+                Timer().schedule(timerTask { close() }, 100)
+                if (interval > 0 && newQuestions > 0 && context.getSharedPreferences("appRunning", 0).getString("currentApp","") == settingsType
+                ) {
+                    Timer().schedule(timerTask, interval*1000*60)
+                }
+            }
+        }
+
         mParams!!.gravity = Gravity.TOP or Gravity.START
         mWindowManager = context.getSystemService(WINDOW_SERVICE) as WindowManager
     }
 
-    fun open(settingsType: String = "globalSettings") {
+    fun open(thisSettingsType: String = "globalSettings") {
+        settingsType = thisSettingsType
         context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
         newQuestions =  context.getSharedPreferences(settingsType,0).getInt("newQuestions",0)
         penaltyQuestions = context.getSharedPreferences(settingsType,0).getInt("penaltyQuestions",0)
@@ -196,6 +230,7 @@ class Window(
             if (mView.windowToken == null && remainingQuestions != 0) {
                 if (mView.parent == null) {
                     mWindowManager.addView(mView, mParams)
+                    scoreText.text = "0/$newQuestions"
                 }
             }
         } catch (e: Exception) {
@@ -243,30 +278,26 @@ class Window(
                 } else if (statsType == "global") {
                     tickLeftChip.text = globalTicks.toString()
                 }
-                remainingQuestions --
 
-                val handler = Handler(Looper.getMainLooper())
-                val timerTask = object : TimerTask() {
-                    override fun run() {
-                        handler.post {
-                            if (!context.getSharedPreferences("appRunning", 0)
-                                    .getBoolean("isActive", false)
-                            ) {
-                                val window = Window(context = context)
-                                window.open()
-                                context.getSharedPreferences("appRunning", 0).edit()
-                                    .putBoolean("serviceActive", true).apply()
-                            }
-                        }
+                if (!closeButton.isEnabled) {
+                    remainingQuestions--
+
+                    scoreText.text = "${newQuestions - remainingQuestions}/$newQuestions"
+                    if (remainingQuestions == 0) {
+                        scoreText.setTextColor(
+                            ContextCompat.getColor(
+                                context,
+                                R.color.green
+                            )
+                        )
+                    } else if (newQuestions - remainingQuestions >= 0) {
+                        scoreText.setTextColor(ContextCompat.getColor(context, R.color.highlight))
                     }
                 }
+
                 if (remainingQuestions == 0) {
-                    Timer().schedule(timerTask { close() }, 500)
-                    if (!context.getSharedPreferences("appRunning",0).getBoolean("isActive", false) &&
-                        interval > 0
-                    ) {
-                        Timer().schedule(timerTask, interval*1000*60)
-                    }
+                    closeButton.isEnabled = true
+                    closeButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.highlight))
                 }
 
             } else {
@@ -293,7 +324,16 @@ class Window(
                 } else if (statsType == "global") {
                     crossLeftChip.text = globalCrosses.toString()
                 }
-                remainingQuestions += penaltyQuestions
+                if (!closeButton.isEnabled) {
+                    remainingQuestions += penaltyQuestions
+                    scoreText.text = "${newQuestions - remainingQuestions}/$newQuestions"
+
+                    if (newQuestions - remainingQuestions < 0) {
+                        scoreText.setTextColor(ContextCompat.getColor(context, R.color.red))
+                    } else if (newQuestions - remainingQuestions >= 0) {
+                        scoreText.setTextColor(ContextCompat.getColor(context, R.color.highlight))
+                    }
+                }
 
             }
             tickRightChip.text = settings?.getInt("${currentSet.replace(".txt","--ticks")}--${term}--${expected}",0).toString()
