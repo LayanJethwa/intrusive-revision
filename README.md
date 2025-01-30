@@ -12,7 +12,7 @@ It is targeted towards anyone who wants to integrate their learning into their d
 
 To install the app, simply head over to the releases tab, download the apk for the latest release, and open it on your Android device. A phone will work best (if the screen is wider than it is long, ie. a tablet, it may not work as intended).
 
-The current release has been quickly hacked together to meet a deadline, so may be buggy.
+The current release (v1.0) has all the basic features completed, and is ready for use! If any bugs are found, please report them in the issue tracker.
     
 ## Features
 
