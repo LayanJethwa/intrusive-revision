@@ -79,6 +79,9 @@ class Window(
     private val newQuestionScore = 5F
 
     private var remainingQuestions = 0
+    private var interval: Long = 0L
+    private var newQuestions: Int = 0
+    private var penaltyQuestions: Int = 0
 
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -183,9 +186,12 @@ class Window(
         mWindowManager = context.getSystemService(WINDOW_SERVICE) as WindowManager
     }
 
-    fun open() {
+    fun open(settingsType: String = "globalSettings") {
         context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
-        remainingQuestions = context.getSharedPreferences("globalSettings",0).getInt("newQuestions",0)
+        newQuestions =  context.getSharedPreferences(settingsType,0).getInt("newQuestions",0)
+        penaltyQuestions = context.getSharedPreferences(settingsType,0).getInt("penaltyQuestions",0)
+        interval = context.getSharedPreferences(settingsType,0).getInt("timeInterval",0).toLong()
+        remainingQuestions = newQuestions
         try {
             if (mView.windowToken == null && remainingQuestions != 0) {
                 if (mView.parent == null) {
@@ -239,7 +245,6 @@ class Window(
                 }
                 remainingQuestions --
 
-                val interval: Long = context.getSharedPreferences("globalSettings",0).getInt("timeInterval",0).toLong()
                 val handler = Handler(Looper.getMainLooper())
                 val timerTask = object : TimerTask() {
                     override fun run() {
@@ -288,7 +293,7 @@ class Window(
                 } else if (statsType == "global") {
                     crossLeftChip.text = globalCrosses.toString()
                 }
-                remainingQuestions += context.getSharedPreferences("globalSettings",0).getInt("penaltyQuestions",0)
+                remainingQuestions += penaltyQuestions
 
             }
             tickRightChip.text = settings?.getInt("${currentSet.replace(".txt","--ticks")}--${term}--${expected}",0).toString()

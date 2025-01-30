@@ -3,7 +3,7 @@
 
 This is a multiple-choice flashcard app I have made for Android, with a simple design. It is intended for ease of use when you have a few minutes on your phone, and can be used offline.
 
-The main feature of this project (though not yet implemented) will be the intrusive settings, where you can choose for it to popup on certain apps, for example social media, and give you a set number of questions to answer before letting you use the app.
+The main feature of this project is the intrusive settings, where you can choose for it to popup on certain apps, for example social media, and give you a set number of questions to answer before letting you use the app.
 
 It is targeted towards anyone who wants to integrate their learning into their daily life, and hopefully will be an effective tool!
 
@@ -22,6 +22,9 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - Simple multiple-choice view to blitz through questions
 - View local and global statistics for all sets, as well as per question
 - Option to show questions based on previous statistics
+- Intrusive settings
+  - You can select the number of questions, the penalty for incorrect answers, and the time interval between popups
+  - You will be served popups globally across the entire phone at the specified time interval
 
 
 ## Roadmap
@@ -43,7 +46,8 @@ The current release has been quickly hacked together to meet a deadline, so may 
 - Allow for selection of multiple sets
     
 #### Intrusive settings ####
-- Per app and global choices
+- Per app choices
+- ~~Global choices~~ [DONE]
 - Number of questions to show
 - Frequency to show questions again
 - Penalty for incorrect answers
