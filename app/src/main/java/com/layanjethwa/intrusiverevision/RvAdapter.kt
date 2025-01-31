@@ -51,6 +51,18 @@ class RvAdapter(private val userList: ArrayList<Model>, val context: Context) : 
         p0.timeInterval.setText(settings.getInt("timeInterval",0).toString())
         p0.penaltyQuestions.setText(settings.getInt("penaltyQuestions",0).toString())
 
+        fun checkBorder() {
+            if (!(settings.getInt("newQuestions",0) == 0 &&
+                settings.getInt("timeInterval",0) == 0 &&
+                settings.getInt("penaltyQuestions",0) == 0)) {
+                p0.card.strokeWidth = dpToPx(2).toInt()
+            } else {
+                p0.card.strokeWidth = 0
+            }
+        }
+
+        checkBorder()
+
         p0.newQuestions.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 if (!p0.newQuestions.text.isDigitsOnly() || p0.newQuestions.text.isBlank()) {
@@ -58,6 +70,7 @@ class RvAdapter(private val userList: ArrayList<Model>, val context: Context) : 
                 }
                 editor?.putInt("newQuestions",p0.newQuestions.text.toString().toInt())
                 editor?.apply()
+                checkBorder()
             } else {
                 p0.newQuestions.text.clear()
             }
@@ -70,6 +83,7 @@ class RvAdapter(private val userList: ArrayList<Model>, val context: Context) : 
                 }
                 editor?.putInt("timeInterval",p0.timeInterval.text.toString().toInt())
                 editor?.apply()
+                checkBorder()
             } else {
                 p0.timeInterval.text.clear()
             }
@@ -82,6 +96,7 @@ class RvAdapter(private val userList: ArrayList<Model>, val context: Context) : 
                 }
                 editor?.putInt("penaltyQuestions",p0.penaltyQuestions.text.toString().toInt())
                 editor?.apply()
+                checkBorder()
             } else {
                 p0.penaltyQuestions.text.clear()
             }
