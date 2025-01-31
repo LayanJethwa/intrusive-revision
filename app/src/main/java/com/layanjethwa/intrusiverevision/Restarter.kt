@@ -13,10 +13,12 @@ class Restarter : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.i("Broadcast Listened", "Service tried to stop")
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(Intent(context, ForegroundService::class.java))
-        } else {
-            context.startService(Intent(context, ForegroundService::class.java))
+        if (!context.getSharedPreferences("appRunning", 0).getBoolean("isActive", false)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(Intent(context, ForegroundService::class.java))
+            } else {
+                context.startService(Intent(context, ForegroundService::class.java))
+            }
         }
     }
 }

@@ -65,6 +65,18 @@ class SettingsFragment: Fragment(R.layout.settings_layout) {
         timeInterval.setText(settings?.getInt("timeInterval",0).toString())
         penaltyQuestions.setText(settings?.getInt("penaltyQuestions",0).toString())
 
+        fun checkBorder() {
+            if (!(settings?.getInt("newQuestions",0) == 0 &&
+                        settings.getInt("timeInterval",0) == 0 &&
+                        settings.getInt("penaltyQuestions",0) == 0)) {
+                globalSettings.strokeWidth = dpToPx(2).toInt()
+            } else {
+                globalSettings.strokeWidth = 0
+            }
+        }
+
+        checkBorder()
+
         newQuestions.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 if (!newQuestions.text.isDigitsOnly()) {
@@ -114,13 +126,15 @@ class SettingsFragment: Fragment(R.layout.settings_layout) {
             val resolvedInfos = packageManager.queryIntentActivities(mainIntent, 0)
             resolvedInfos.sortBy { it.activityInfo.applicationInfo.loadLabel(packageManager).toString().lowercase(Locale.getDefault()) }
             for (info in resolvedInfos) {
-                dataList.add(
-                    Model(
-                        info.activityInfo.applicationInfo.loadLabel(packageManager).toString(),
-                        info.activityInfo.loadIcon(packageManager),
-                        info.activityInfo.packageName
+                if (info.activityInfo.packageName != "com.layanjethwa.intrusiverevision") {
+                    dataList.add(
+                        Model(
+                            info.activityInfo.applicationInfo.loadLabel(packageManager).toString(),
+                            info.activityInfo.loadIcon(packageManager),
+                            info.activityInfo.packageName
+                        )
                     )
-                )
+                }
             }
             val rvAdapter = RvAdapter(dataList, requireContext())
             requireActivity().runOnUiThread {

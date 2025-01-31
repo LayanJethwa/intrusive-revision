@@ -41,7 +41,8 @@
             app:cardElevation="0dp"
             app:layout_constraintEnd_toStartOf="@+id/marginRight"
             app:layout_constraintStart_toStartOf="@+id/marginLeft"
-            app:layout_constraintTop_toTopOf="@+id/marginTop">
+            app:layout_constraintTop_toTopOf="@+id/marginTop"
+            app:strokeColor="@color/highlight">
 
         </com.google.android.material.card.MaterialCardView>
 

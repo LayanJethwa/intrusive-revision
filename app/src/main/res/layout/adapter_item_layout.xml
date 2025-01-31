@@ -8,7 +8,8 @@
     android:layout_marginBottom="16dp"
     app:cardBackgroundColor="@color/dark_grey"
     app:cardCornerRadius="16dp"
-    app:cardElevation="0dp">
+    app:cardElevation="0dp"
+    app:strokeColor="@color/highlight">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -81,11 +82,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:layout_marginStart="4dp"
+                android:imeOptions="actionDone"
                 android:inputType="number"
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
-                android:imeOptions="actionDone"
                 android:text="@string/zero_text" />
 
             <TextView
@@ -102,11 +103,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:layout_marginStart="4dp"
+                android:imeOptions="actionDone"
                 android:inputType="number"
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
-                android:imeOptions="actionDone"
                 android:text="@string/zero_text" />
 
             <TextView
@@ -123,11 +124,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:layout_marginStart="4dp"
+                android:imeOptions="actionDone"
                 android:inputType="number"
                 android:minEms="1"
                 android:paddingTop="0dp"
                 android:paddingBottom="8dp"
-                android:imeOptions="actionDone"
                 android:text="@string/zero_text" />
 
             <TextView

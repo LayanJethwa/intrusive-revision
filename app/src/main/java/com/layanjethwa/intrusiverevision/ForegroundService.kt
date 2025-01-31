@@ -38,6 +38,7 @@ class ForegroundService : Service() {
         }
 
         getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",false).apply()
+        getSharedPreferences("appRunning",0).edit().putBoolean("isActive",true).apply()
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             startMyOwnForeground()
         } else {
@@ -52,8 +53,6 @@ class ForegroundService : Service() {
                 handler.post {
                     window = Window(context = applicationContext)
                     window.open()
-                    getSharedPreferences("appRunning", 0).edit()
-                        .putBoolean("serviceActive", true).apply()
                 }
             }
         }
@@ -86,8 +85,6 @@ class ForegroundService : Service() {
                                     handler.post {
                                         window = Window(context = applicationContext)
                                         window.open(id)
-                                        getSharedPreferences("appRunning", 0).edit()
-                                            .putBoolean("serviceActive", true).apply()
                                     }
                                 }
                             }
@@ -107,10 +104,7 @@ class ForegroundService : Service() {
         }
         val interval: Long =
             getSharedPreferences("globalSettings", 0).getInt("timeInterval", 0).toLong()
-        if (!getSharedPreferences("appRunning", 0).getBoolean("serviceActive", false) &&
-            !getSharedPreferences("appRunning", 0).getBoolean("isActive", false) &&
-            interval > 0
-        ) {
+        if (interval > 0) {
             Timer().schedule(timerTask, interval * 1000 * 60)
         }
 
@@ -154,6 +148,7 @@ class ForegroundService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",false).apply()
+        getSharedPreferences("appRunning",0).edit().putBoolean("isActive",false).apply()
         window.close()
         timer.cancel()
         timer.purge()

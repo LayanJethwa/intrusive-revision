@@ -3,6 +3,7 @@ package com.layanjethwa.intrusiverevision
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Context.WINDOW_SERVICE
+import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.PixelFormat
 import android.os.Build
@@ -144,8 +145,6 @@ class Window(
             }
         }
 
-        mView.findViewById<View>(R.id.tickLeftChip).setOnClickListener { close() }
-
         fullQuestion = nextQuestion("NONE")
         currentTerm = fullQuestion[0]
         currentDef = fullQuestion[1]
@@ -200,8 +199,6 @@ class Window(
                     handler.post {
                         val window = Window(context = context)
                         window.open(settingsType)
-                        context.getSharedPreferences("appRunning", 0).edit()
-                            .putBoolean("serviceActive", true).apply()
                     }
                 }
             }
@@ -216,22 +213,26 @@ class Window(
         }
 
         mParams!!.gravity = Gravity.TOP or Gravity.START
+        mParams!!.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         mWindowManager = context.getSystemService(WINDOW_SERVICE) as WindowManager
     }
 
     fun open(thisSettingsType: String = "globalSettings") {
         settingsType = thisSettingsType
-        context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
         newQuestions =  context.getSharedPreferences(settingsType,0).getInt("newQuestions",0)
         penaltyQuestions = context.getSharedPreferences(settingsType,0).getInt("penaltyQuestions",0)
         interval = context.getSharedPreferences(settingsType,0).getInt("timeInterval",0).toLong()
         remainingQuestions = newQuestions
         try {
-            if (mView.windowToken == null && remainingQuestions != 0) {
-                if (mView.parent == null) {
-                    mWindowManager.addView(mView, mParams)
-                    scoreText.text = "0/$newQuestions"
-                }
+            if (mView.windowToken == null && remainingQuestions != 0 &&
+                !context.getSharedPreferences("appRunning", 0).getBoolean("serviceActive", false) &&
+                !context.getSharedPreferences("appRunning", 0).getBoolean("isActive", false) && mView.parent == null &&
+                (settingsType == "globalSettings" &&
+                        context.getSharedPreferences(context.getSharedPreferences("appRunning", 0).getString("currentApp",""), 0).getInt("newQuestions",0) == 0) ||
+                (settingsType != "globalSettings" && interval.toInt() != 0)) {
+                mWindowManager.addView(mView, mParams)
+                scoreText.text = "0/$newQuestions"
+                context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
             }
         } catch (e: Exception) {
             Log.d("Error1", e.toString())
