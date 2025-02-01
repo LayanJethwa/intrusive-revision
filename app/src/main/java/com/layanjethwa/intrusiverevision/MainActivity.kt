@@ -103,6 +103,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        Log.i("onDestroy","destroyed")
         this.getSharedPreferences("appRunning", 0).edit().putBoolean("isActive", false).apply()
         val broadcastIntent = Intent()
         broadcastIntent.setAction("restartservice")
@@ -113,11 +114,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        this.getSharedPreferences("appRunning",0).edit().putBoolean("isActive", false).apply()
         this.runOnUiThread {
             mYourService = ForegroundService()
             mServiceIntent = Intent(this, mYourService.javaClass)
             if (!isMyServiceRunning(mYourService.javaClass)) {
+                this.getSharedPreferences("appRunning",0).edit().putBoolean("isActive", false).apply()
                 startService(mServiceIntent)
             }
         }

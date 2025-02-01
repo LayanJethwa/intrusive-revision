@@ -67,9 +67,9 @@ class ForegroundService : Service() {
                 while (usageEvents.hasNextEvent()) {
                     usageEvents.getNextEvent(usageEvent)
                     val id = usageEvent.packageName
+                    Log.e("APP","$id with ${usageEvent.eventType}")
                     if (id !in systemApps && usageEvent.eventType in mutableListOf(1,19)) {
                         getSharedPreferences("appRunning",0).edit().putString("currentApp", id).apply()
-                        Log.e("APP", "$id ${usageEvent.eventType}")
                         if (getSharedPreferences(id, 0).getInt(
                                 "timeInterval",
                                 0

@@ -226,10 +226,9 @@ class Window(
         try {
             if (mView.windowToken == null && remainingQuestions != 0 &&
                 !context.getSharedPreferences("appRunning", 0).getBoolean("serviceActive", false) &&
-                !context.getSharedPreferences("appRunning", 0).getBoolean("isActive", false) && mView.parent == null &&
-                (settingsType == "globalSettings" &&
+                mView.parent == null && ((settingsType == "globalSettings" &&
                         context.getSharedPreferences(context.getSharedPreferences("appRunning", 0).getString("currentApp",""), 0).getInt("newQuestions",0) == 0) ||
-                (settingsType != "globalSettings" && interval.toInt() != 0)) {
+                (settingsType != "globalSettings" && interval.toInt() != 0))) {
                 mWindowManager.addView(mView, mParams)
                 scoreText.text = "0/$newQuestions"
                 context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
