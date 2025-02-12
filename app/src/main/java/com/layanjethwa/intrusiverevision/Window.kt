@@ -6,6 +6,7 @@ import android.content.Context.WINDOW_SERVICE
 import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.PixelFormat
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -17,6 +18,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
@@ -91,6 +93,11 @@ class Window(
 
     private var settingsType: String = "globalSettings"
 
+    private val correctSound = MediaPlayer.create(context, R.raw.correct)
+    private val incorrectSound = MediaPlayer.create(context, R.raw.incorrect)
+    private var muted = context.getSharedPreferences("globalSettings", 0).getBoolean("muted", false)
+    private var muteButton: ImageView
+
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mParams = WindowManager.LayoutParams(
@@ -127,27 +134,7 @@ class Window(
 
         scoreText = mView.findViewById(R.id.scoreText)
         closeButton = mView.findViewById(R.id.closeButton)
-
-
-        val currentSetFile = File(context.filesDir?.path, "currentSet.txt")
-        if (currentSetFile.exists()) {
-            context.openFileInput("currentSet.txt").use { stream ->
-                currentSet = stream?.bufferedReader().use {
-                    it?.readText().toString()
-                }
-            }
-        }
-
-        val setFile = File(context.filesDir?.path, currentSet)
-        if (setFile.exists() && currentSet != "NONE") {
-            context.openFileInput(currentSet).use { stream ->
-                flashcards = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n")
-            }
-        }
-
-        fullQuestion = nextQuestion("NONE")
-        currentTerm = fullQuestion[0]
-        currentDef = fullQuestion[1]
+        muteButton = mView.findViewById(R.id.muteButton)
 
         buttonTopLeft.setOnClickListener {
             validateInput(currentDef, buttonTopLeft.text.toString(), currentTerm)
@@ -191,11 +178,25 @@ class Window(
                 "random"
             }
         }
+        muteButton.setOnClickListener {
+            if (muted) {
+                muted = false
+                context.getSharedPreferences("globalSettings", 0).edit().putBoolean("muted", false).apply()
+                muteButton.setImageResource(R.drawable.volume)
+                muteButton.setColorFilter(ContextCompat.getColor(context, R.color.pastel_green))
+            } else {
+                muted = true
+                context.getSharedPreferences("globalSettings", 0).edit().putBoolean("muted", true).apply()
+                muteButton.setImageResource(R.drawable.mute)
+                muteButton.setColorFilter(ContextCompat.getColor(context, R.color.pastel_red))
+            }
+        }
 
         closeButton.setOnClickListener {
             val handler = Handler(Looper.getMainLooper())
             val timerTask = object : TimerTask() {
                 override fun run() {
+                    context.getSharedPreferences("appRunning",0).edit().putInt("currentTimers",0).apply()
                     handler.post {
                         val window = Window(context = context)
                         window.open(settingsType)
@@ -206,8 +207,9 @@ class Window(
             if (closeButton.isEnabled) {
                 Timer().schedule(timerTask { close() }, 100)
                 if (interval > 0 && newQuestions > 0 && context.getSharedPreferences("appRunning", 0).getString("currentApp","") == settingsType
-                ) {
+                    && context.getSharedPreferences("appRunning",0).getInt("currentTimers",0) == 0) {
                     Timer().schedule(timerTask, interval*1000*60)
+                    context.getSharedPreferences("appRunning",0).edit().putInt("currentTimers",1).apply()
                 }
             }
         }
@@ -232,6 +234,49 @@ class Window(
                 mWindowManager.addView(mView, mParams)
                 scoreText.text = "0/$newQuestions"
                 context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
+
+                val currentSetFile = File(context.filesDir?.path, "currentSet.txt")
+                if (currentSetFile.exists()) {
+                    context.openFileInput("currentSet.txt").use { stream ->
+                        currentSet = stream?.bufferedReader().use {
+                            it?.readText().toString()
+                        }
+                    }
+                }
+
+                val setFile = File(context.filesDir?.path, currentSet)
+                if (setFile.exists() && currentSet != "NONE") {
+                    context.openFileInput(currentSet).use { stream ->
+                        flashcards = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n")
+                    }
+                }
+
+                fullQuestion = nextQuestion("NONE")
+                currentTerm = fullQuestion[0]
+                currentDef = fullQuestion[1]
+
+                sessionTicks = 0
+                sessionCrosses = 0
+                globalTicks = settings?.getInt(currentSet.replace(".txt","--ticks"),0)!!
+                globalCrosses = settings?.getInt(currentSet.replace(".txt","--crosses"),0)!!
+                if (statsType == "session") {
+                    tickLeftChip.text = "0"
+                    crossLeftChip.text = "0"
+                } else if (statsType == "global") {
+                    tickLeftChip.text = globalTicks.toString()
+                    crossLeftChip.text = globalCrosses.toString()
+                }
+
+                muted = context.getSharedPreferences("globalSettings", 0).getBoolean("muted", false)
+
+                if (!muted) {
+                    muteButton.setImageResource(R.drawable.volume)
+                    muteButton.setColorFilter(ContextCompat.getColor(context, R.color.pastel_green))
+                } else {
+                    muteButton.setImageResource(R.drawable.mute)
+                    muteButton.setColorFilter(ContextCompat.getColor(context, R.color.pastel_red))
+                }
+
             }
         } catch (e: Exception) {
             Log.d("Error1", e.toString())
@@ -255,6 +300,12 @@ class Window(
     fun validateInput(expected: String, clicked: String, term: String) {
         if (currentSet != "NONE") {
             if (expected == clicked) {
+                if (!muted) {
+                    correctSound.start()
+                    correctSound.pause()
+                    correctSound.seekTo(0)
+                    correctSound.start()
+                }
                 validate.setCardBackgroundColor(
                     ContextCompat.getColor(
                         context,
@@ -301,6 +352,12 @@ class Window(
                 }
 
             } else {
+                if (!muted) {
+                    incorrectSound.start()
+                    incorrectSound.pause()
+                    incorrectSound.seekTo(0)
+                    incorrectSound.start()
+                }
                 validate.setCardBackgroundColor(
                     ContextCompat.getColor(
                         context,

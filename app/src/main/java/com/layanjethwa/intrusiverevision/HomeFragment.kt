@@ -1,12 +1,14 @@
 package com.layanjethwa.intrusiverevision
 
 import android.annotation.SuppressLint
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
@@ -220,10 +222,29 @@ class HomeFragment : Fragment(R.layout.home_layout) {
         val statsSwitch: SwitchCompat = fragmentView.findViewById(R.id.statsSwitch)
         val checkBox: CheckBox = fragmentView.findViewById(R.id.checkBox)
 
+        val correctSound = MediaPlayer.create(context, R.raw.correct)
+        val incorrectSound = MediaPlayer.create(context, R.raw.incorrect)
+        val muteButton: ImageView = fragmentView.findViewById(R.id.muteButton)
+        var muted = requireActivity().getSharedPreferences("globalSettings", 0)?.getBoolean("muted", false)!!
+
+        if (!muted) {
+            muteButton.setImageResource(R.drawable.volume)
+            muteButton.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.pastel_green))
+        } else {
+            muteButton.setImageResource(R.drawable.mute)
+            muteButton.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.pastel_red))
+        }
+
         @SuppressLint("SetTextI18n")
         fun validateInput(expected: String, clicked: String, term: String) {
             if (currentSet != "NONE") {
                 if (expected == clicked) {
+                    if (!muted) {
+                        correctSound.start()
+                        correctSound.pause()
+                        correctSound.seekTo(0)
+                        correctSound.start()
+                    }
                     validate.setCardBackgroundColor(
                         ContextCompat.getColor(
                             requireActivity(),
@@ -249,6 +270,12 @@ class HomeFragment : Fragment(R.layout.home_layout) {
                     }
 
                 } else {
+                    if (!muted) {
+                        incorrectSound.start()
+                        incorrectSound.pause()
+                        incorrectSound.seekTo(0)
+                        incorrectSound.start()
+                    }
                     validate.setCardBackgroundColor(
                         ContextCompat.getColor(
                             requireActivity(),
@@ -328,6 +355,19 @@ class HomeFragment : Fragment(R.layout.home_layout) {
                 "spaced"
             } else {
                 "random"
+            }
+        }
+        muteButton.setOnClickListener {
+            if (muted) {
+                muted = false
+                this.activity?.getSharedPreferences("globalSettings", 0)?.edit()?.putBoolean("muted", false)?.apply()
+                muteButton.setImageResource(R.drawable.volume)
+                muteButton.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.pastel_green))
+            } else {
+                muted = true
+                this.activity?.getSharedPreferences("globalSettings", 0)?.edit()?.putBoolean("muted", true)?.apply()
+                muteButton.setImageResource(R.drawable.mute)
+                muteButton.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.pastel_red))
             }
         }
 

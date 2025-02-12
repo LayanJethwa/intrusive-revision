@@ -58,11 +58,12 @@ You can find a demo video here: https://github.com/LayanJethwa/intrusive-revisio
 - ~~Counter for questions left to unlock close button~~ [DONE]
 
 ### Polishes ###
-- App icon
-- Icons for swipe bar
-- Animations and glow
-- Global/session stats switch colour
-- Sounds on right/wrong answers
+- ~~App icon~~ [DONE]
+- ~~Colours for swipe bar~~ [DONE]
+- ~~Animations and glow~~ [DONE]
+- ~~Global/session stats switch colour~~ [DONE]
+- ~~Checkbox colour~~ [DONE]
+- ~~Sounds on right/wrong answers~~ [DONE]
 
 ### Eventual aims ###
 - Find a way to bypass 100 card limit

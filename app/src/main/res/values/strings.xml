@@ -8,7 +8,7 @@
     <string name="question_text">Previous question</string>
     <string name="equals_text">=</string>
     <string name="zero_text">0</string>
-    <string name="checkbox_text">Show questions based on your past stats</string>
+    <string name="checkbox_text">Show questions based on past stats</string>
     <string name="close_text">close</string>
     <string name="global_settings_text">Global settings</string>
 

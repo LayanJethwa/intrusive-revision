@@ -50,6 +50,7 @@ class ForegroundService : Service() {
         super.onStartCommand(intent, flags, startId)
         timerTask = object : TimerTask() {
             override fun run() {
+                getSharedPreferences("appRunning",0).edit().putInt("currentTimers",0).apply()
                 handler.post {
                     window = Window(context = applicationContext)
                     window.open()
@@ -67,9 +68,10 @@ class ForegroundService : Service() {
                 while (usageEvents.hasNextEvent()) {
                     usageEvents.getNextEvent(usageEvent)
                     val id = usageEvent.packageName
-                    Log.e("APP","$id with ${usageEvent.eventType}")
-                    if (id !in systemApps && usageEvent.eventType in mutableListOf(1,19)) {
-                        getSharedPreferences("appRunning",0).edit().putString("currentApp", id).apply()
+                    Log.e("APP", "$id with ${usageEvent.eventType}")
+                    if (id !in systemApps && usageEvent.eventType in mutableListOf(1, 19)) {
+                        getSharedPreferences("appRunning", 0).edit().putString("currentApp", id)
+                            .apply()
                         if (getSharedPreferences(id, 0).getInt(
                                 "timeInterval",
                                 0
@@ -104,8 +106,9 @@ class ForegroundService : Service() {
         }
         val interval: Long =
             getSharedPreferences("globalSettings", 0).getInt("timeInterval", 0).toLong()
-        if (interval > 0) {
+        if (interval > 0 && getSharedPreferences("appRunning",0).getInt("currentTimers",0) == 0) {
             Timer().schedule(timerTask, interval * 1000 * 60)
+            getSharedPreferences("appRunning",0).edit().putInt("currentTimers",1).apply()
         }
 
         Timer().schedule(checkApps, 0, 2000)
@@ -149,6 +152,7 @@ class ForegroundService : Service() {
         super.onDestroy()
         getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",false).apply()
         getSharedPreferences("appRunning",0).edit().putBoolean("isActive",false).apply()
+        getSharedPreferences("appRunning",0).edit().putInt("currentTimers",0).apply()
         window.close()
         timer.cancel()
         timer.purge()

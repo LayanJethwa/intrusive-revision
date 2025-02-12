@@ -102,6 +102,7 @@
         android:text="@string/checkbox_text"
         android:textColor="@color/light_text"
         app:checkedState="checked"
+        android:buttonTint="@color/highlight"
         app:layout_constraintEnd_toStartOf="@+id/marginRight"
         app:layout_constraintStart_toStartOf="@+id/marginLeft"
         app:layout_constraintTop_toTopOf="@+id/questionField" />
@@ -163,7 +164,8 @@
         android:text="@string/switch_text"
         android:textColor="@color/light_text"
         app:layout_constraintStart_toStartOf="@+id/marginLeft"
-        app:layout_constraintTop_toBottomOf="@+id/buttonBottomLeft" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonBottomLeft"
+        android:theme="@style/HighlightSwitch"/>
 
     <TextView
         android:id="@+id/statsGlobal"
@@ -374,5 +376,17 @@
         app:backgroundTint="@color/light_grey"
         app:layout_constraintBottom_toBottomOf="@+id/questionField"
         app:layout_constraintEnd_toEndOf="@+id/questionField" />
+
+    <ImageView
+        android:id="@+id/muteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:elevation="3dp"
+        app:layout_constraintStart_toStartOf="@+id/marginLeft"
+        app:layout_constraintTop_toTopOf="@id/marginTop"
+        android:src="@drawable/volume"
+        app:tint="@color/pastel_green" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,7 +14,9 @@
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:tabIndicatorColor="@color/highlight"
+        app:tabSelectedTextColor="@color/highlight" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"
