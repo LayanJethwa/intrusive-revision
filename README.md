@@ -7,6 +7,8 @@ The main feature of this project is the intrusive settings, where you can choose
 
 It is targeted towards anyone who wants to integrate their learning into their daily life, and hopefully will be an effective tool!
 
+The privacy policy can be accessed on this link: [https://layanjethwa.github.io/intrusive-revision/](https://layanjethwa.github.io/intrusive-revision/)
+
 ![Logo](https://github.com/LayanJethwa/intrusive-revision/blob/master/screenshots/logo-square.png)
 
 ## Installation
