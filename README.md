@@ -17,7 +17,7 @@ To install the app, simply head over to the releases tab, download the apk for t
 
 The current release (v1.2) has all the basic features completed, and is ready for use! If any bugs are found, please report them in the issue tracker.
 
-You can find a demo video here: ![Demo Video](https://github.com/LayanJethwa/intrusive-revision/blob/master/screenshots/demo-video.mp4)](https://github.com/LayanJethwa/intrusive-revision/blob/master/screenshots/demo-video.mp4)
+You can find a demo video here: ![https://github.com/LayanJethwa/intrusive-revision/blob/master/screenshots/demo-video.mp4](https://github.com/LayanJethwa/intrusive-revision/blob/master/screenshots/demo-video.mp4)
     
 ## Features
 
