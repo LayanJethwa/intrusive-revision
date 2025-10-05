@@ -1,26 +1,20 @@
 package com.layanjethwa.intrusiverevision
 
-import android.app.ActivityManager
-import android.app.AppOpsManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Process
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.tabs.TabLayoutMediator
 import com.layanjethwa.intrusiverevision.databinding.LayoutBinding
-
+import android.content.Context
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: LayoutBinding
-    private lateinit var mServiceIntent: Intent
-    private lateinit var mYourService: ForegroundService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,10 +22,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         enableEdgeToEdge()
 
-        this.getSharedPreferences("appRunning",0).edit().putBoolean("isActive", true).apply()
+        // Mark app as active
+        getSharedPreferences("appRunning",0).edit().putBoolean("isActive", true).apply()
 
         checkPermissions()
+        ensureAccessibilityEnabled()
 
+        // Setup fragments and tabs
         val fragments = listOf(
             FlashcardsFragment(),
             HomeFragment(),
@@ -45,88 +42,80 @@ class MainActivity : AppCompatActivity() {
         )
 
         binding.pager.adapter = adapter
-        binding.pager.post {
-            binding.pager.setCurrentItem(1,true)
-        }
+        binding.pager.post { binding.pager.setCurrentItem(1,true) }
 
-        TabLayoutMediator(binding.tabLayout, binding.pager){tab, position ->
+        TabLayoutMediator(binding.tabLayout, binding.pager){ tab, position ->
             tab.text = when(position){
                 0 -> "Flashcards"
                 1 -> "Questions"
                 else -> "Settings"
             }
         }.attach()
-
-
     }
 
-    @Suppress("DEPRECATION")
-    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                Log.i("Service status", "Running")
-                return true
-            }
-        }
-        Log.i("Service status", "Not running")
-        return false
-    }
-
+    // -----------------------
+    // Permission checks
+    // -----------------------
     private fun checkPermissions() {
         if (!Settings.canDrawOverlays(this)) {
-            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
-                startActivity(this)
-            }
+            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
         }
-        if (!NotificationManagerCompat.from(this).areNotificationsEnabled() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(this, Array(1){android.Manifest.permission.POST_NOTIFICATIONS}, 1)
+
+        if (!NotificationManagerCompat.from(this).areNotificationsEnabled() &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                1
+            )
         }
-        val appOpsManager = getSystemService(APP_OPS_SERVICE) as AppOpsManager
+
+        val appOpsManager = getSystemService(APP_OPS_SERVICE) as android.app.AppOpsManager
         val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             appOpsManager.unsafeCheckOpNoThrow(
                 "android:get_usage_stats",
-                Process.myUid(), packageName
+                android.os.Process.myUid(),
+                packageName
             )
-        }
-        else {
+        } else {
             appOpsManager.checkOpNoThrow(
                 "android:get_usage_stats",
-                Process.myUid(), packageName
+                android.os.Process.myUid(),
+                packageName
             )
         }
-        if (mode != AppOpsManager.MODE_ALLOWED) {
-            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-                startActivity(this)
+        if (mode != android.app.AppOpsManager.MODE_ALLOWED) {
+            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                startActivity(intent)
             }
         }
     }
 
-    override fun onDestroy() {
-        Log.i("onDestroy","destroyed")
-        this.getSharedPreferences("appRunning", 0).edit().putBoolean("isActive", false).apply()
-        val broadcastIntent = Intent()
-        broadcastIntent.setAction("restartservice")
-        broadcastIntent.setClass(this, Restarter::class.java)
-        this.sendBroadcast(broadcastIntent)
-        super.onDestroy()
-    }
+    // -----------------------
+    // AccessibilityService check
+    // -----------------------
+    private fun ensureAccessibilityEnabled() {
+        val enabledServices = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: "false"
 
-    override fun onPause() {
-        super.onPause()
-        this.runOnUiThread {
-            mYourService = ForegroundService()
-            mServiceIntent = Intent(this, mYourService.javaClass)
-            if (!isMyServiceRunning(mYourService.javaClass)) {
-                this.getSharedPreferences("appRunning",0).edit().putBoolean("isActive", false).apply()
-                startService(mServiceIntent)
-            }
+        val packageName = "$packageName/.AppMonitorService"
+
+        if (!enabledServices.contains(packageName)) {
+            // Prompt user to enable AccessibilityService
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
     }
 
     override fun onResume() {
         super.onResume()
-        this.getSharedPreferences("appRunning",0).edit().putBoolean("isActive", true).apply()
+        getSharedPreferences("appRunning",0).edit().putBoolean("isActive", true).apply()
     }
-
 }

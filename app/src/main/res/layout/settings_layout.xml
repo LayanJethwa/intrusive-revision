@@ -2,170 +2,23 @@
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
+
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/marginTop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.04" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/marginLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.04" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/marginRight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.96" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/globalSettings"
-            android:layout_width="0dp"
-            android:layout_height="25dp"
-            app:cardBackgroundColor="@color/dark_grey"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:layout_constraintEnd_toStartOf="@+id/marginRight"
-            app:layout_constraintStart_toStartOf="@+id/marginLeft"
-            app:layout_constraintTop_toTopOf="@+id/marginTop"
-            app:strokeColor="@color/highlight">
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            android:id="@+id/globalText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="1dp"
-            android:text="@string/global_settings_text"
-            android:textColor="@color/highlight"
-            app:layout_constraintStart_toStartOf="@+id/globalSettings"
-            app:layout_constraintTop_toTopOf="@+id/marginTop" />
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/globalTextGroup"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/globalSettings"
-            app:layout_constraintEnd_toStartOf="@+id/marginRight"
-            app:layout_constraintStart_toStartOf="@+id/marginLeft"
-            app:layout_constraintTop_toTopOf="@id/globalSettings">
-
-            <TextView
-                android:id="@+id/displayText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="@string/settings1"
-                android:textColor="@color/light_text"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/newQuestions"
-                android:inputType="number"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:layout_marginStart="4dp"
-                android:minEms="1"
-                android:paddingTop="0dp"
-                android:paddingBottom="8dp"
-                android:imeOptions="actionDone"
-                android:text="@string/zero_text" />
-
-            <TextView
-                android:id="@+id/questionsText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="@string/settings2"
-                android:textColor="@color/light_text"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/timeInterval"
-                android:inputType="number"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:layout_marginStart="4dp"
-                android:minEms="1"
-                android:paddingTop="0dp"
-                android:paddingBottom="8dp"
-                android:imeOptions="actionDone"
-                android:text="@string/zero_text" />
-
-            <TextView
-                android:id="@+id/penaltyText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="@string/settings3"
-                android:textColor="@color/light_text"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/penaltyQuestions"
-                android:inputType="number"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:layout_marginStart="4dp"
-                android:minEms="1"
-                android:paddingTop="0dp"
-                android:paddingBottom="8dp"
-                android:imeOptions="actionDone"
-                android:text="@string/zero_text" />
-
-            <TextView
-                android:id="@+id/incorrectText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="@string/settings4"
-                android:textColor="@color/light_text"
-                android:textSize="18sp" />
-
-        </com.google.android.material.chip.ChipGroup>
-
-        <ImageView
-            android:id="@+id/collapseChevron"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:layout_marginEnd="4dp"
-            android:scaleX="1.5"
-            android:scaleY="1.5"
-            app:layout_constraintEnd_toStartOf="@+id/marginRight"
-            app:layout_constraintTop_toTopOf="@+id/globalSettings"
-            app:srcCompat="@drawable/baseline_arrow_drop_down_24"
-            app:tint="@color/highlight" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/marginRight"
-            app:layout_constraintStart_toStartOf="@+id/marginLeft"
-            app:layout_constraintTop_toBottomOf="@+id/globalSettings" />
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

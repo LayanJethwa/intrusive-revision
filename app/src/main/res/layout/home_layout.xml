@@ -358,6 +358,7 @@
         app:layout_constraintStart_toStartOf="@+id/marginLeft"
         app:layout_constraintTop_toTopOf="@id/marginTop"
         app:srcCompat="@drawable/volume"
-        app:tint="@color/pastel_green" />
+        app:tint="@color/pastel_green"
+        tools:ignore="ContentDescription,ImageContrastCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

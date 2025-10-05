@@ -384,9 +384,10 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
         android:elevation="3dp"
+        android:src="@drawable/volume"
         app:layout_constraintStart_toStartOf="@+id/marginLeft"
         app:layout_constraintTop_toTopOf="@id/marginTop"
-        android:src="@drawable/volume"
-        app:tint="@color/pastel_green" />
+        app:tint="@color/pastel_green"
+        tools:ignore="ContentDescription,ImageContrastCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -420,6 +420,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         currentSetCross = fragmentView.findViewById(R.id.crossChip)
         currentSetRename = fragmentView.findViewById(R.id.renameButton)
 
+        @SuppressLint("SimpleDateFormat")
         fun addSet() {
             requireActivity().runOnUiThread {
                 Toast.makeText(
@@ -428,96 +429,60 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                     Toast.LENGTH_LONG
                 ).show()
             }
-            var date: String
-            var title: String
-            var terms: Int
-            val fileRead = Thread {
-                val url = inputText.text.toString()
+
+            val url = inputText.text.toString()
+            Thread {
                 val doc: String = try {
                     Jsoup.connect(url)
                         .maxBodySize(0)
                         .timeout(0)
-                        .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0")
+                        .userAgent("Mozilla/5.0")
                         .get().toString()
                 } catch (e: Exception) {
                     "ERROR"
                 }
 
-                @SuppressLint("SimpleDateFormat")
-                if (doc != "ERROR") {
+                if (doc == "ERROR") {
                     requireActivity().runOnUiThread {
-                        Toast.makeText(
-                                activity?.applicationContext,
-                                "Parsing cards",
-                                Toast.LENGTH_LONG
-                            ).show()
+                        Toast.makeText(context, "Connection error", Toast.LENGTH_LONG).show()
                     }
-                    val cards = Regex("""\\"label\\":\\"(?:word|definition)\\",\\"media\\":\[\{\\"type\\":1,\\"plainText\\":\\"(.+?)\\""").findAll(doc)
-                    title = Regex("""<title>(.+?) Flashcards""").findAll(doc).toList()[0].groups[1]?.value.toString()
-                    date = SimpleDateFormat("dd/MM/yy").format(Calendar.getInstance().time).toString()
-                    val fileDate = SimpleDateFormat("yyMMdd").format(Calendar.getInstance().time).toString()
-                    terms = (cards.toList().size/2)
-                    var counter = 0
+                    return@Thread
+                }
 
-                    val file = File(context?.filesDir, "$fileDate--$title.txt")
-                    if (file.exists()) {
-                        file.delete()
-                    }
-
-                    if (cards.toList().size > 1) {
-                        activity?.applicationContext?.openFileOutput(
-                            "$fileDate--$title.txt",
-                            Context.MODE_PRIVATE
-                        )
-                            .use {
-                                for (card in cards) {
-                                    it?.write(
-                                        card.groups[1]?.value?.toByteArray()
-                                            ?: "ERROR".toByteArray()
-                                    )
-                                    if ((counter % 2 == 1) && (counter != (cards.toList().size - 1))) {
-                                        it?.write("\n".toByteArray())
-                                    } else if (counter != (cards.toList().size - 1)) {
-                                        it?.write("||".toByteArray())
-                                    }
-                                counter++
-                                }
-                                it?.flush()
-                                it?.close()
-                            }
-
-                        requireActivity().runOnUiThread {
-                            addCard(date, title, terms, "$fileDate--$title.txt", border = true)
-                            Toast.makeText(
-                                activity?.applicationContext,
-                                "Set initialised",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-
-                        setCurrentSet("$fileDate--$title.txt")
-                    } else {
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(
-                                activity?.applicationContext,
-                                "Invalid link",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    }
-
-                } else {
+                val cards = Regex("""\\"label\\":\\"(?:word|definition)\\",\\"media\\":\[\{\\"type\\":1,\\"plainText\\":\\"(.+?)\\""").findAll(doc).toList()
+                if (cards.isEmpty()) {
                     requireActivity().runOnUiThread {
-                        Toast.makeText(
-                            activity?.applicationContext,
-                            "Connection error",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        Toast.makeText(context, "Invalid or empty Quizlet set", Toast.LENGTH_LONG).show()
+                    }
+                    return@Thread
+                }
+
+                val titleMatch = Regex("""<title>(.+?) Flashcards""").find(doc)
+                val title = titleMatch?.groups?.get(1)?.value ?: "Untitled Set"
+
+                val date = SimpleDateFormat("dd/MM/yy").format(Calendar.getInstance().time)
+                val fileDate = SimpleDateFormat("yyMMdd").format(Calendar.getInstance().time)
+                val terms = cards.size / 2
+
+                val fileName = "$fileDate--$title.txt"
+                val file = File(context?.filesDir, fileName)
+                if (file.exists()) file.delete()
+
+                activity?.applicationContext?.openFileOutput(fileName, Context.MODE_PRIVATE).use { out ->
+                    for ((counter, card) in cards.withIndex()) {
+                        out?.write(card.groups[1]?.value?.toByteArray() ?: "ERROR".toByteArray())
+                        if (counter % 2 == 1 && counter != cards.size - 1) out?.write("\n".toByteArray())
+                        else if (counter != cards.size - 1) out?.write("||".toByteArray())
                     }
                 }
-            }
 
-            fileRead.start()
+                requireActivity().runOnUiThread {
+                    addCard(date, title, terms, fileName, border = true)
+                    setCurrentSet(fileName)
+                    Toast.makeText(context, "Set initialized", Toast.LENGTH_LONG).show()
+                }
+
+            }.start()
         }
 
         inputBox.setEndIconOnClickListener{

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -53,7 +52,7 @@
                 android:id="@+id/addSetText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Paste Quizlet link (must be on 1st card):"
+                android:hint="@string/quizlet_text"
                 android:textColor="@color/light_text" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -64,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="Current set:"
+            android:text="@string/current_set_text"
             android:textColor="@color/light_text"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="@+id/marginLeft"
@@ -174,7 +173,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/currentSet"
             app:layout_constraintEnd_toEndOf="@+id/currentSet"
             app:srcCompat="@drawable/bin"
-            app:tint="@color/red" />
+            app:tint="@color/red"
+            tools:ignore="ContentDescription" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/marginSetTitles"
@@ -193,7 +193,8 @@
             app:layout_constraintStart_toEndOf="@+id/setTitle"
             app:layout_constraintTop_toTopOf="@+id/setTitle"
             app:srcCompat="@drawable/rename"
-            app:tint="@color/black" />
+            app:tint="@color/black"
+            tools:ignore="ContentDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

@@ -16,7 +16,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:tabIndicatorColor="@color/highlight"
-        app:tabSelectedTextColor="@color/highlight" />
+        app:tabSelectedTextColor="@color/highlight"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"

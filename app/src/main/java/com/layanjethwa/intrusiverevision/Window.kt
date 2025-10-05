@@ -36,6 +36,8 @@ import kotlin.random.Random
 class Window(
     private val context: Context
 ) {
+    var onClose: (() -> Unit)? = null
+
     private val mView: View
     private var mParams: WindowManager.LayoutParams? = null
     private val mWindowManager: WindowManager
@@ -97,6 +99,11 @@ class Window(
     private val incorrectSound = MediaPlayer.create(context, R.raw.incorrect)
     private var muted = context.getSharedPreferences("globalSettings", 0).getBoolean("muted", false)
     private var muteButton: ImageView
+
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        var activeWindow: Window? = null
+    }
 
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -220,62 +227,63 @@ class Window(
     }
 
     fun open(thisSettingsType: String = "globalSettings") {
+        Log.i("Window", "Window open called")
+
+        if (activeWindow != null) return
+        activeWindow = this
+
         settingsType = thisSettingsType
         newQuestions =  context.getSharedPreferences(settingsType,0).getInt("newQuestions",0)
         penaltyQuestions = context.getSharedPreferences(settingsType,0).getInt("penaltyQuestions",0)
         interval = context.getSharedPreferences(settingsType,0).getInt("timeInterval",0).toLong()
         remainingQuestions = newQuestions
         try {
-            if (mView.windowToken == null && remainingQuestions != 0 &&
-                !context.getSharedPreferences("appRunning", 0).getBoolean("serviceActive", false) &&
-                mView.parent == null && ((settingsType == "globalSettings" &&
-                        context.getSharedPreferences(context.getSharedPreferences("appRunning", 0).getString("currentApp",""), 0).getInt("newQuestions",0) == 0) ||
-                (settingsType != "globalSettings" && interval.toInt() != 0))) {
-                mWindowManager.addView(mView, mParams)
-                scoreText.text = "0/$newQuestions"
-                context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
+            if (mView.parent == null && remainingQuestions != 0) {
+                    mWindowManager.addView(mView, mParams)
+                    scoreText.text = "0/$newQuestions"
+                    context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
 
-                val currentSetFile = File(context.filesDir?.path, "currentSet.txt")
-                if (currentSetFile.exists()) {
-                    context.openFileInput("currentSet.txt").use { stream ->
-                        currentSet = stream?.bufferedReader().use {
-                            it?.readText().toString()
+                    val currentSetFile = File(context.filesDir?.path, "currentSet.txt")
+                    if (currentSetFile.exists()) {
+                        context.openFileInput("currentSet.txt").use { stream ->
+                            currentSet = stream?.bufferedReader().use {
+                                it?.readText().toString()
+                            }
                         }
                     }
-                }
 
-                val setFile = File(context.filesDir?.path, currentSet)
-                if (setFile.exists() && currentSet != "NONE") {
-                    context.openFileInput(currentSet).use { stream ->
-                        flashcards = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n")
+                    val setFile = File(context.filesDir?.path, currentSet)
+                    if (setFile.exists() && currentSet != "NONE") {
+                        context.openFileInput(currentSet).use { stream ->
+                            flashcards = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n")
+                        }
                     }
-                }
 
-                fullQuestion = nextQuestion("NONE")
-                currentTerm = fullQuestion[0]
-                currentDef = fullQuestion[1]
+                    fullQuestion = nextQuestion("NONE")
+                    currentTerm = fullQuestion[0]
+                    currentDef = fullQuestion[1]
 
-                sessionTicks = 0
-                sessionCrosses = 0
-                globalTicks = settings?.getInt(currentSet.replace(".txt","--ticks"),0)!!
-                globalCrosses = settings?.getInt(currentSet.replace(".txt","--crosses"),0)!!
-                if (statsType == "session") {
-                    tickLeftChip.text = "0"
-                    crossLeftChip.text = "0"
-                } else if (statsType == "global") {
-                    tickLeftChip.text = globalTicks.toString()
-                    crossLeftChip.text = globalCrosses.toString()
-                }
+                    sessionTicks = 0
+                    sessionCrosses = 0
+                    globalTicks = settings?.getInt(currentSet.replace(".txt","--ticks"),0)!!
+                    globalCrosses = settings?.getInt(currentSet.replace(".txt","--crosses"),0)!!
+                    if (statsType == "session") {
+                        tickLeftChip.text = "0"
+                        crossLeftChip.text = "0"
+                    } else if (statsType == "global") {
+                        tickLeftChip.text = globalTicks.toString()
+                        crossLeftChip.text = globalCrosses.toString()
+                    }
 
-                muted = context.getSharedPreferences("globalSettings", 0).getBoolean("muted", false)
+                    muted = context.getSharedPreferences("globalSettings", 0).getBoolean("muted", false)
 
-                if (!muted) {
-                    muteButton.setImageResource(R.drawable.volume)
-                    muteButton.setColorFilter(ContextCompat.getColor(context, R.color.pastel_green))
-                } else {
-                    muteButton.setImageResource(R.drawable.mute)
-                    muteButton.setColorFilter(ContextCompat.getColor(context, R.color.pastel_red))
-                }
+                    if (!muted) {
+                        muteButton.setImageResource(R.drawable.volume)
+                        muteButton.setColorFilter(ContextCompat.getColor(context, R.color.pastel_green))
+                    } else {
+                        muteButton.setImageResource(R.drawable.mute)
+                        muteButton.setColorFilter(ContextCompat.getColor(context, R.color.pastel_red))
+                    }
 
             }
         } catch (e: Exception) {
@@ -283,8 +291,7 @@ class Window(
         }
     }
 
-    fun close() {
-        context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",false).apply()
+    private fun close() {
         try {
             (context.getSystemService(WINDOW_SERVICE) as WindowManager).removeView(mView)
             mView.invalidate()
@@ -293,6 +300,9 @@ class Window(
             }
         } catch (e: Exception) {
             Log.d("Error2", e.toString())
+        } finally {
+            activeWindow = null
+            onClose?.invoke()
         }
     }
 

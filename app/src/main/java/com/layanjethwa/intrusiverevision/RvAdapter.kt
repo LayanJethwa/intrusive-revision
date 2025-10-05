@@ -2,109 +2,133 @@ package com.layanjethwa.intrusiverevision
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.Resources.getSystem
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.text.isDigitsOnly
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.ChipGroup
 
-class RvAdapter(private val userList: ArrayList<Model>, val context: Context) : RecyclerView.Adapter<RvAdapter.ViewHolder>() {
-    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
-        val v = LayoutInflater.from(p0.context).inflate(R.layout.adapter_item_layout, p0, false)
+class RvAdapter(private val userList: ArrayList<Model>, private val context: Context) :
+    RecyclerView.Adapter<RvAdapter.ViewHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val v = LayoutInflater.from(parent.context)
+            .inflate(R.layout.app_item_layout, parent, false)
         return ViewHolder(v)
     }
-    override fun getItemCount(): Int {
-        return userList.size
+
+    override fun getItemCount(): Int = userList.size
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * getSystem().displayMetrics.density).toInt()
     }
-    private fun dpToPx(dp: Int): Float {
-        return (dp * getSystem().displayMetrics.density)
-    }
+
     @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(p0: ViewHolder, p1: Int) {
-        val settings = context.getSharedPreferences(userList[p1].id, 0)
-        val editor = settings.edit()
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val app = userList[position]
+        val prefs: SharedPreferences = context.getSharedPreferences(app.id, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
 
-        p0.name.text = userList[p1].name
-        p0.icon.setImageDrawable(userList[p1].icon)
-        p0.card.setOnClickListener{
-            val params: ViewGroup.LayoutParams = p0.card.layoutParams
-            val collapsedHeight = dpToPx(40).toInt()
+        val layoutParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.topMargin = if (position == 0) dpToPx(24) else dpToPx(0)
+        layoutParams.leftMargin = dpToPx(16)
+        layoutParams.rightMargin = dpToPx(16)
+        layoutParams.bottomMargin = dpToPx(16)
+        holder.card.layoutParams = layoutParams
+
+        holder.appTitle.text = app.name
+        holder.appIcon.setImageDrawable(app.icon)
+        holder.chevron.setImageResource(R.drawable.baseline_arrow_drop_down_24)
+
+        // Load saved values
+        holder.newQuestions.setText(prefs.getInt("newQuestions", 0).toString())
+        holder.timeInterval.setText(prefs.getInt("timeInterval", 0).toString())
+        holder.penaltyQuestions.setText(prefs.getInt("penaltyQuestions", 0).toString())
+
+        // Expand/collapse on chevron click
+        holder.card.setOnClickListener {
+            val params: ViewGroup.LayoutParams = holder.card.layoutParams
+            val collapsedHeight = dpToPx(40)
             if ((collapsedHeight-2..collapsedHeight+2).contains(params.height)) {
-                params.height = dpToPx(160).toInt()
-                p0.chipGroup.visibility = View.VISIBLE
-                p0.chevron.setImageResource(R.drawable.baseline_arrow_drop_up_24)
+                params.height = dpToPx(160)
+                holder.chipGroup.visibility = View.VISIBLE
+                holder.chevron.setImageResource(R.drawable.baseline_arrow_drop_up_24)
             } else {
-                params.height = dpToPx(40).toInt()
-                p0.chipGroup.visibility = View.INVISIBLE
-                p0.chevron.setImageResource(R.drawable.baseline_arrow_drop_down_24)
+                params.height = dpToPx(40)
+                holder.chipGroup.visibility = View.INVISIBLE
+                holder.chevron.setImageResource(R.drawable.baseline_arrow_drop_down_24)
             }
 
-            p0.card.layoutParams = params
+            holder.card.layoutParams = params
         }
-        p0.newQuestions.setText(settings.getInt("newQuestions",0).toString())
-        p0.timeInterval.setText(settings.getInt("timeInterval",0).toString())
-        p0.penaltyQuestions.setText(settings.getInt("penaltyQuestions",0).toString())
 
-        fun checkBorder() {
-            if (!(settings.getInt("newQuestions",0) == 0 &&
-                settings.getInt("timeInterval",0) == 0 &&
-                settings.getInt("penaltyQuestions",0) == 0)) {
-                p0.card.strokeWidth = dpToPx(2).toInt()
+        // Focus change listeners
+        editTextHighlight(holder.newQuestions, editor, "newQuestions", holder.card, holder)
+        editTextHighlight(holder.timeInterval, editor, "timeInterval", holder.card, holder)
+        editTextHighlight(holder.penaltyQuestions, editor, "penaltyQuestions", holder.card, holder)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun editTextHighlight(
+        editText: EditText,
+        editor: SharedPreferences.Editor,
+        key: String,
+        card: MaterialCardView,
+        holder: ViewHolder
+    ) {
+        val highlightColor = ContextCompat.getColor(context, R.color.highlight)
+        val defaultColor = ContextCompat.getColor(context, R.color.dark_grey)
+        val highlightWidth = dpToPx(2)
+        val defaultWidth = dpToPx(0)
+
+        val updateHighlight: () -> Unit = {
+            val nQ = holder.newQuestions.text.toString().toIntOrNull() ?: 0
+            val tI = holder.timeInterval.text.toString().toIntOrNull() ?: 0
+            val pQ = holder.penaltyQuestions.text.toString().toIntOrNull() ?: 0
+
+            if (nQ != 0 || tI != 0 || pQ != 0) {
+                card.strokeColor = highlightColor
+                card.strokeWidth = highlightWidth
             } else {
-                p0.card.strokeWidth = 0
+                card.strokeColor = defaultColor
+                card.strokeWidth = defaultWidth
             }
         }
 
-        checkBorder()
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                updateHighlight()
+            }
+        })
 
-        p0.newQuestions.setOnFocusChangeListener { _, hasFocus ->
+        editText.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                if (!p0.newQuestions.text.isDigitsOnly() || p0.newQuestions.text.isBlank()) {
-                    p0.newQuestions.setText(R.string.zero_text)
-                }
-                editor?.putInt("newQuestions",p0.newQuestions.text.toString().toInt())
-                editor?.apply()
-                checkBorder()
-            } else {
-                p0.newQuestions.text.clear()
-            }
-        }
-
-        p0.timeInterval.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                if (!p0.timeInterval.text.isDigitsOnly() || p0.timeInterval.text.isBlank()) {
-                    p0.timeInterval.setText(R.string.zero_text)
-                }
-                editor?.putInt("timeInterval",p0.timeInterval.text.toString().toInt())
-                editor?.apply()
-                checkBorder()
-            } else {
-                p0.timeInterval.text.clear()
-            }
-        }
-
-        p0.penaltyQuestions.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                if (!p0.penaltyQuestions.text.isDigitsOnly() || p0.penaltyQuestions.text.isBlank()) {
-                    p0.penaltyQuestions.setText(R.string.zero_text)
-                }
-                editor?.putInt("penaltyQuestions",p0.penaltyQuestions.text.toString().toInt())
-                editor?.apply()
-                checkBorder()
-            } else {
-                p0.penaltyQuestions.text.clear()
+                val text = editText.text.toString()
+                val value = if (!text.isDigitsOnly() || TextUtils.isEmpty(text)) 0 else text.toInt()
+                editText.setText(value.toString())
+                editor.putInt(key, value)
+                editor.apply()
+                updateHighlight()
             }
         }
     }
+
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val name: TextView = itemView.findViewById(R.id.appTitle)
-        val icon: ImageView = itemView.findViewById(R.id.appIcon)
+        val appTitle: TextView = itemView.findViewById(R.id.appTitle)
+        val appIcon: ImageView = itemView.findViewById(R.id.appIcon)
         val chevron: ImageView = itemView.findViewById(R.id.appChevron)
         val card: MaterialCardView = itemView.findViewById(R.id.appCard)
         val chipGroup: ChipGroup = itemView.findViewById(R.id.globalTextGroup)
