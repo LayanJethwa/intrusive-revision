@@ -13,6 +13,7 @@ class AppMonitorService : AccessibilityService() {
             private set
 
         private val activePopups = mutableSetOf<String>()
+        private var now = System.currentTimeMillis()
 
         fun getForegroundAppPackage(): String? {
             return instance?.currentForegroundApp
@@ -25,7 +26,7 @@ class AppMonitorService : AccessibilityService() {
     }
 
     private var currentForegroundApp: String? = null
-    private val ignoredApps = setOf("com.layanjethwa.intrusiverevision", "android")
+    private val ignoredApps = setOf("com.layanjethwa.intrusiverevision", "android", "com.android.systemui")
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -36,9 +37,12 @@ class AppMonitorService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val packageName = event.packageName?.toString() ?: return
+        val className = event.className?.toString() ?: ""
         if (packageName in ignoredApps) return
+        if (className.contains("StatusBar") || className.contains("VolumeDialog")) return
 
         currentForegroundApp = packageName
+        Log.i("AppMonitorService", "Foreground: $packageName / $className")
 
         val prefs = getSharedPreferences(packageName, MODE_PRIVATE)
         val timeInterval = prefs.getInt("timeInterval", 0)
@@ -47,8 +51,9 @@ class AppMonitorService : AccessibilityService() {
 
         // Only schedule a popup if at least one setting is non-zero
         if (timeInterval > 0 && (newQuestions > 0 || penaltyQuestions > 0)) {
-            if (!activePopups.contains(packageName)) {
+            if ((!activePopups.contains(packageName)) || (System.currentTimeMillis()-now > 30000)){
                 activePopups.add(packageName)
+                now = System.currentTimeMillis()
                 val intent = Intent(this, PopupReceiver::class.java).apply {
                     putExtra("appId", packageName)
                 }
