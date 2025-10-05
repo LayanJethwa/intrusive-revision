@@ -30,8 +30,7 @@ You can find a demo video here: [https://youtube.com/shorts/QtwILmPgwfY](https:/
 - Intrusive settings
   - Starts on phone boot
   - You can select the number of questions, the penalty for incorrect answers, and the time interval between popups
-  - You will be served popups globally across the entire phone at the specified time interval
-  - You can also select the above parameters for specific apps
+  - You will be served popups when using specific apps at the specified time interval
 
 
 ## Roadmap
