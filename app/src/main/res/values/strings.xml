@@ -16,6 +16,6 @@
     <string name="settings2">new question(s) every</string>
     <string name="settings3">minute(s), with a penalty of</string>
     <string name="settings4">question(s) for each incorrect answer</string>
-    <string name="quizlet_text">Paste Quizlet link (must be on 1st card):</string>
+    <string name="quizlet_text">Paste Quizlet link or export (see GitHub):</string>
     <string name="current_set_text">Current set:</string>
 </resources>

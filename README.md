@@ -11,6 +11,7 @@ The privacy policy can be accessed on this link: [https://layanjethwa.github.io/
 
 ![Logo](https://github.com/LayanJethwa/intrusive-revision/blob/master/screenshots/logo-square.png)
 
+
 ## Installation
 
 To install the app, simply head over to the releases tab, download the apk for the latest release, and open it on your Android device. A phone will work best (if the screen is wider than it is long, ie. a tablet, it may not work as intended).
@@ -18,11 +19,15 @@ To install the app, simply head over to the releases tab, download the apk for t
 The current release (v1.2) has all the basic features completed, and is ready for use! If any bugs are found, please report them in the issue tracker.
 
 You can find a demo video here: [https://youtube.com/shorts/QtwILmPgwfY](https://youtube.com/shorts/QtwILmPgwfY)
+
+To get started, copy and paste a URL from Quizlet (capped at 100 cards), or paste a Quizlet export (with "<" and ">" as separators)
     
+
 ## Features
 
 - Fully offline storage and usage of flashcards
 - Quizlet set scraper (capped at 100 cards for now)
+  - Option to manually add Quizlet export ({name}:{term}<{def}>)
 - Dynamic view for flashcard management
 - Simple multiple-choice view to blitz through questions
 - View local and global statistics for all sets, as well as per question
@@ -68,7 +73,7 @@ You can find a demo video here: [https://youtube.com/shorts/QtwILmPgwfY](https:/
 - ~~Sounds on right/wrong answers~~ [DONE]
 
 ### Eventual aims ###
-- Find a way to bypass 100 card limit
+- ~~Find a way to bypass 100 card limit~~ [MANUAL SOLUTION]
 
 
 ## Screenshots

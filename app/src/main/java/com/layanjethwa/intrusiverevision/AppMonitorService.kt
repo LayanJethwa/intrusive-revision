@@ -26,7 +26,7 @@ class AppMonitorService : AccessibilityService() {
     }
 
     private var currentForegroundApp: String? = null
-    private val ignoredApps = setOf("com.layanjethwa.intrusiverevision", "android", "com.android.systemui")
+    private val ignoredApps = setOf("com.layanjethwa.intrusiverevision", "android", "com.android.systemui", "com.google.android.inputmethod.latin")
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -39,7 +39,7 @@ class AppMonitorService : AccessibilityService() {
         val packageName = event.packageName?.toString() ?: return
         val className = event.className?.toString() ?: ""
         if (packageName in ignoredApps) return
-        if (className.contains("StatusBar") || className.contains("VolumeDialog")) return
+        if (className.contains("StatusBar") || className.contains("VolumeDialog") || className.contains("inputmethod")) return
 
         currentForegroundApp = packageName
         Log.i("AppMonitorService", "Foreground: $packageName / $className")

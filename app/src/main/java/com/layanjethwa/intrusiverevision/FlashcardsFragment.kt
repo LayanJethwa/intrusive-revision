@@ -6,10 +6,13 @@ import android.content.SharedPreferences
 import android.content.res.Resources.getSystem
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -31,8 +34,14 @@ import java.util.Calendar
 
 class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
+    data class CardComponents(
+        val tickChip: Chip,
+        val crossChip: Chip,
+        val checkBox: CheckBox
+    )
+
     private val sets = mutableListOf<MaterialCardView>()
-    private val cardGraphics = mutableMapOf<MaterialCardView, MutableList<Chip>>()
+    private val cardGraphics = mutableMapOf<MaterialCardView, CardComponents>()
     private val setFileNames = mutableMapOf<MaterialCardView, String>()
     private lateinit var layout : ConstraintLayout
     private var currentSetFileNameInit = ""
@@ -85,7 +94,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         }
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
     private fun addCard(date: String, title: String, terms: Int, setFileName: String, border: Boolean = false) {
         val myCard = context?.let { MaterialCardView(it) }
         val mySetTitle = context?.let{ TextView(it) }
@@ -95,6 +104,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         val myCrossChip = context?.let { Chip(it) }
         val myBinButton = context?.let { ImageButton(it) }
         val myRenameButton = context?.let { ImageButton(it) }
+        val mySelectBox = context?.let { CheckBox(it) }
 
         val cardLayoutParams = ConstraintLayout.LayoutParams(0,dpToPx(50).toInt())
         val setTitleLayoutParams = ConstraintLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT)
@@ -104,6 +114,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         val crossChipLayoutParams = ConstraintLayout.LayoutParams(LayoutParams.WRAP_CONTENT,dpToPx(30).toInt())
         val binButtonLayoutParams = ConstraintLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT)
         val renameButtonLayoutParams = ConstraintLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT)
+        val selectBoxLayoutParams = ConstraintLayout.LayoutParams(dpToPx(30).toInt(),dpToPx(30).toInt())
 
         cardLayoutParams.setMargins(
             dpToPx(8).toInt(),
@@ -120,6 +131,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         crossChipLayoutParams.setMargins(dpToPx(8).toInt(),0,0,dpToPx(-4).toInt())
         binButtonLayoutParams.setMargins(0,0,dpToPx(8).toInt(),dpToPx(8).toInt())
         renameButtonLayoutParams.setMargins(dpToPx(8).toInt(),0,0,0)
+        selectBoxLayoutParams.setMargins(0,0,0,dpToPx(8).toInt())
 
         myCard?.setCardBackgroundColor(ContextCompat.getColor(requireActivity(),
             R.color.light_grey
@@ -173,6 +185,22 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         myRenameButton?.setImageResource(R.drawable.rename)
         myRenameButton?.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.black))
 
+        mySelectBox?.buttonTintList = ContextCompat.getColorStateList(requireActivity(), R.color.highlight)
+        mySelectBox?.isClickable = true
+        mySelectBox?.isFocusable = true
+
+        val updateSelectedSetsPref: (String, Boolean) -> Unit = { file, add ->
+            val selected = settings.getString("selectedSetsList", "") ?: ""
+            val list = selected.split(",").filter { it.isNotBlank() }.toMutableList()
+            if (add) {
+                if (!list.contains(file)) list.add(file)
+            } else {
+                list.removeAll { it == file }
+            }
+            settings.edit().putString("selectedSetsList", list.joinToString(",")).apply()
+            setFragmentResult("setsList", bundleOf("trigger" to "data"))
+        }
+
         val numTermsText = "$terms terms"
         mySetTitle?.text = title
         myTermChip?.text = numTermsText
@@ -191,6 +219,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         myCrossChip?.layoutParams = crossChipLayoutParams
         myBinButton?.layoutParams = binButtonLayoutParams
         myRenameButton?.layoutParams = renameButtonLayoutParams
+        mySelectBox?.layoutParams = selectBoxLayoutParams
 
         myCard?.id = View.generateViewId()
         mySetTitle?.id = View.generateViewId()
@@ -200,16 +229,23 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         myCrossChip?.id = View.generateViewId()
         myBinButton?.id = View.generateViewId()
         myRenameButton?.id = View.generateViewId()
+        mySelectBox?.id = View.generateViewId()
 
         myCard?.setOnClickListener{
 
             for (card in sets){
                 card.strokeWidth = 0
+                cardGraphics[card]?.checkBox?.isChecked = false
             }
 
             myCard.strokeColor = ContextCompat.getColor(requireActivity(), R.color.highlight)
             myCard.strokeWidth = dpToPx(3).toInt()
+            cardGraphics[myCard]?.checkBox?.isChecked = true
 
+            val editor = settings.edit()
+            editor.putString("selectedSetsList", setFileName)
+            editor.apply()
+            setFragmentResult("setsList", bundleOf("trigger" to "data"))
             setCurrentSet(setFileName)
         }
 
@@ -221,6 +257,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         layout.addView(myCrossChip)
         layout.addView(myBinButton)
         layout.addView(myRenameButton)
+        layout.addView(mySelectBox)
 
         val cardConstraintParams = ConstraintSet()
         cardConstraintParams.clone(layout)
@@ -313,6 +350,19 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                 it1, ConstraintSet.TOP)
         } }
 
+        mySelectBox?.id?.let { myCrossChip?.id?.let { it1 ->
+            cardConstraintParams.connect(it, ConstraintSet.BOTTOM,
+                it1, ConstraintSet.BOTTOM)
+        } }
+        mySelectBox?.id?.let { myBinButton?.id?.let { it1 ->
+            cardConstraintParams.connect(it, ConstraintSet.END,
+                it1, ConstraintSet.START)
+        } }
+        mySelectBox?.id?.let { myCrossChip?.id?.let { it1 ->
+            cardConstraintParams.connect(it, ConstraintSet.START,
+                it1, ConstraintSet.END)
+        } }
+
         myCard?.id?.let {
             cardConstraintParams.connect(
                 it,
@@ -339,7 +389,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         }
 
         if (myCard != null && mySetTitle != null && myTermChip != null && myDateChip != null && myTickChip != null && myCrossChip != null && myBinButton != null && myRenameButton != null) {
-            cardGraphics[myCard] = mutableListOf(myTickChip,myCrossChip)
+            cardGraphics[myCard] = mySelectBox?.let { CardComponents(myTickChip,myCrossChip, it) }!!
         }
 
         myBinButton?.setOnClickListener {
@@ -356,6 +406,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             layout.removeView(myCrossChip)
             layout.removeView(myBinButton)
             layout.removeView(myRenameButton)
+            layout.removeView(mySelectBox)
 
             if (myCard == sets.last() && myCard != sets.first()) {
                 val cardChanged = sets[sets.size-2]
@@ -387,6 +438,15 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
             changeCardConstraintParams.applyTo(layout)
             layout.requestLayout()
+        }
+
+        mySelectBox?.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                val newChecked = !(mySelectBox.isChecked ?: false)
+                mySelectBox.isChecked = newChecked
+                updateSelectedSetsPref(setFileName, newChecked)
+            }
+            true
         }
 
         cardConstraintParams.applyTo(layout)
@@ -432,47 +492,69 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
             val url = inputText.text.toString()
             Thread {
-                val doc: String = try {
-                    Jsoup.connect(url)
-                        .maxBodySize(0)
-                        .timeout(0)
-                        .userAgent("Mozilla/5.0")
-                        .get().toString()
-                } catch (e: Exception) {
-                    "ERROR"
-                }
-
-                if (doc == "ERROR") {
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(context, "Connection error", Toast.LENGTH_LONG).show()
+                val cards: List<Pair<String, String>>
+                val title: String
+                if (url.contains("quizlet.com")) {
+                    val doc: String = try {
+                        Jsoup.connect(url)
+                            .maxBodySize(0)
+                            .timeout(0)
+                            .userAgent("Mozilla/5.0")
+                            .get().toString()
+                    } catch (e: Exception) {
+                        "ERROR"
                     }
-                    return@Thread
-                }
 
-                val cards = Regex("""\\"label\\":\\"(?:word|definition)\\",\\"media\\":\[\{\\"type\\":1,\\"plainText\\":\\"(.+?)\\""").findAll(doc).toList()
-                if (cards.isEmpty()) {
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(context, "Invalid or empty Quizlet set", Toast.LENGTH_LONG).show()
+                    if (doc == "ERROR") {
+                        requireActivity().runOnUiThread {
+                            Toast.makeText(context, "Connection error", Toast.LENGTH_LONG).show()
+                        }
+                        return@Thread
                     }
-                    return@Thread
-                }
 
-                val titleMatch = Regex("""<title>(.+?) Flashcards""").find(doc)
-                val title = titleMatch?.groups?.get(1)?.value ?: "Untitled Set"
+                    cards =
+                        Regex("""\\"label\\":\\"(?:word|definition)\\",\\"media\\":\[\{\\"type\\":1,\\"plainText\\":\\"(.+?)\\""").findAll(
+                            doc
+                        ).map { it.groups[1]?.value ?: "" }.toList().chunked(2).map { it[0] to it[1] }
+                    if (cards.isEmpty()) {
+                        requireActivity().runOnUiThread {
+                            Toast.makeText(
+                                context,
+                                "Invalid or empty Quizlet set",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        return@Thread
+                    }
+
+                    val titleMatch = Regex("""<title.*>(.+?) Flashcards""").find(doc)
+                    title = titleMatch?.groups?.get(1)?.value ?: "Untitled Set"
+                } else {
+                    val match = Regex("""(.+?)\|((?:.+?<.+?>)+)""").findAll(url).toList()[0]
+                    title = match.groups[1]?.value ?: "Untitled Set"
+                    cards = Regex("(.+?)<(.+?)>").findAll(match.groups[2]?.value ?: "term").map {
+                        pair ->
+                        val term = pair.groups[1]?.value ?: ""
+                        val def = pair.groups[2]?.value ?: ""
+                        term to def
+                    }.toList()
+                }
 
                 val date = SimpleDateFormat("dd/MM/yy").format(Calendar.getInstance().time)
                 val fileDate = SimpleDateFormat("yyMMdd").format(Calendar.getInstance().time)
-                val terms = cards.size / 2
+                val terms = cards.size
 
                 val fileName = "$fileDate--$title.txt"
                 val file = File(context?.filesDir, fileName)
                 if (file.exists()) file.delete()
 
                 activity?.applicationContext?.openFileOutput(fileName, Context.MODE_PRIVATE).use { out ->
-                    for ((counter, card) in cards.withIndex()) {
-                        out?.write(card.groups[1]?.value?.toByteArray() ?: "ERROR".toByteArray())
-                        if (counter % 2 == 1 && counter != cards.size - 1) out?.write("\n".toByteArray())
-                        else if (counter != cards.size - 1) out?.write("||".toByteArray())
+                    for (card in cards) {
+                        if (card != cards.last()) {
+                            out?.write("${card.first}||${card.second}\n".toByteArray())
+                        } else {
+                            out?.write("${card.first}||${card.second}".toByteArray())
+                        }
                     }
                 }
 
@@ -538,9 +620,9 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         resumeCount ++
         if (resumeCount > 1) {
             for (card in sets) {
-                cardGraphics[card]?.get(0)?.text = settings.getInt("${setFileNames[card]?.replace(".txt","")}--ticks",0)
+                cardGraphics[card]?.tickChip?.text = settings.getInt("${setFileNames[card]?.replace(".txt","")}--ticks",0)
                     .toString()
-                cardGraphics[card]?.get(1)?.text = settings.getInt("${setFileNames[card]?.replace(".txt","")}--crosses",0)
+                cardGraphics[card]?.crossChip?.text = settings.getInt("${setFileNames[card]?.replace(".txt","")}--crosses",0)
                     .toString()
             }
             currentSetTick.text = settings.getInt("${currentSetFileName.replace(".txt","")}--ticks",0)
