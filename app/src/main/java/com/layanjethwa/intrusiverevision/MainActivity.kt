@@ -12,7 +12,6 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.tabs.TabLayoutMediator
 import com.layanjethwa.intrusiverevision.databinding.LayoutBinding
 import android.content.Context
-import android.util.Log
 import android.view.accessibility.AccessibilityManager
 
 @Suppress("DEPRECATION")

@@ -30,6 +30,7 @@ import org.jsoup.Jsoup
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
@@ -441,7 +442,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
 
         mySelectBox?.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
-                val newChecked = !(mySelectBox.isChecked ?: false)
+                val newChecked = !(mySelectBox.isChecked)
                 mySelectBox.isChecked = newChecked
                 updateSelectedSetsPref(setFileName, newChecked)
             }
@@ -539,8 +540,8 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
                     }.toList()
                 }
 
-                val date = SimpleDateFormat("dd/MM/yy").format(Calendar.getInstance().time)
-                val fileDate = SimpleDateFormat("yyMMdd").format(Calendar.getInstance().time)
+                val date = SimpleDateFormat("dd/MM/yy", Locale.UK).format(Calendar.getInstance().time)
+                val fileDate = SimpleDateFormat("yyMMdd", Locale.UK).format(Calendar.getInstance().time)
                 val terms = cards.size
 
                 val fileName = "$fileDate--$title.txt"
