@@ -20,14 +20,14 @@ The current release (v1.2) has all the basic features completed, and is ready fo
 
 You can find a demo video here: [https://youtube.com/shorts/QtwILmPgwfY](https://youtube.com/shorts/QtwILmPgwfY)
 
-To get started, copy and paste a URL from Quizlet (capped at 100 cards), or paste a Quizlet export (with "<" and ">" as separators)
+To get started, copy and paste a URL from Quizlet (capped at 100 cards), or paste a Quizlet export (with "|" after the title, and "<" and ">" as separators)
     
 
 ## Features
 
 - Fully offline storage and usage of flashcards
 - Quizlet set scraper (capped at 100 cards for now)
-  - Option to manually add Quizlet export ({name}:{term}<{def}>)
+  - Option to manually add Quizlet export ({name}|{term}<{def}>)
 - Dynamic view for flashcard management
 - Simple multiple-choice view to blitz through questions
 - View local and global statistics for all sets, as well as per question

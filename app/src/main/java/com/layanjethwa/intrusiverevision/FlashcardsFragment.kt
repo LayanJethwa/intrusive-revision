@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.content.res.Resources.getSystem
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -52,7 +51,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
     private lateinit var currentSetDate : Chip
     private lateinit var currentSetTick : Chip
     private lateinit var currentSetCross : Chip
-    private lateinit var currentSetRename : ImageButton
+    //private lateinit var currentSetRename : ImageButton
 
     private lateinit var settings : SharedPreferences
 
@@ -89,7 +88,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             currentSetTick.text = settings.getInt("${set.replace(".txt","")}--ticks",0).toString()
             currentSetCross.text = settings.getInt("${set.replace(".txt","")}--crosses",0).toString()
             currentSetTitle.requestLayout()
-            currentSetRename.requestLayout()
+            //currentSetRename.requestLayout()
             layout.requestLayout()
         }
     }
@@ -103,7 +102,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         val myTickChip = context?.let { Chip(it) }
         val myCrossChip = context?.let { Chip(it) }
         val myBinButton = context?.let { ImageButton(it) }
-        val myRenameButton = context?.let { ImageButton(it) }
+        //val myRenameButton = context?.let { ImageButton(it) }
         val mySelectBox = context?.let { CheckBox(it) }
 
         val cardLayoutParams = ConstraintLayout.LayoutParams(0,dpToPx(50).toInt())
@@ -113,7 +112,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         val tickChipLayoutParams = ConstraintLayout.LayoutParams(LayoutParams.WRAP_CONTENT,dpToPx(30).toInt())
         val crossChipLayoutParams = ConstraintLayout.LayoutParams(LayoutParams.WRAP_CONTENT,dpToPx(30).toInt())
         val binButtonLayoutParams = ConstraintLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT)
-        val renameButtonLayoutParams = ConstraintLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT)
+        //val renameButtonLayoutParams = ConstraintLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT)
         val selectBoxLayoutParams = ConstraintLayout.LayoutParams(dpToPx(30).toInt(),dpToPx(30).toInt())
 
         cardLayoutParams.setMargins(
@@ -130,7 +129,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         tickChipLayoutParams.setMargins(dpToPx(8).toInt(),0,0,dpToPx(-4).toInt())
         crossChipLayoutParams.setMargins(dpToPx(8).toInt(),0,0,dpToPx(-4).toInt())
         binButtonLayoutParams.setMargins(0,0,dpToPx(8).toInt(),dpToPx(8).toInt())
-        renameButtonLayoutParams.setMargins(dpToPx(8).toInt(),0,0,0)
+        //renameButtonLayoutParams.setMargins(dpToPx(8).toInt(),0,0,0)
         selectBoxLayoutParams.setMargins(0,0,0,dpToPx(8).toInt())
 
         myCard?.setCardBackgroundColor(ContextCompat.getColor(requireActivity(),
@@ -181,9 +180,9 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         myBinButton?.setImageResource(R.drawable.bin)
         myBinButton?.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.red))
 
-        myRenameButton?.setBackgroundColor(ContextCompat.getColor(requireActivity(), android.R.color.transparent))
+        /*myRenameButton?.setBackgroundColor(ContextCompat.getColor(requireActivity(), android.R.color.transparent))
         myRenameButton?.setImageResource(R.drawable.rename)
-        myRenameButton?.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.black))
+        myRenameButton?.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.black))*/
 
         mySelectBox?.buttonTintList = ContextCompat.getColorStateList(requireActivity(), R.color.highlight)
         mySelectBox?.isClickable = true
@@ -218,7 +217,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         myTickChip?.layoutParams = tickChipLayoutParams
         myCrossChip?.layoutParams = crossChipLayoutParams
         myBinButton?.layoutParams = binButtonLayoutParams
-        myRenameButton?.layoutParams = renameButtonLayoutParams
+        //myRenameButton?.layoutParams = renameButtonLayoutParams
         mySelectBox?.layoutParams = selectBoxLayoutParams
 
         myCard?.id = View.generateViewId()
@@ -228,7 +227,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         myTickChip?.id = View.generateViewId()
         myCrossChip?.id = View.generateViewId()
         myBinButton?.id = View.generateViewId()
-        myRenameButton?.id = View.generateViewId()
+        //myRenameButton?.id = View.generateViewId()
         mySelectBox?.id = View.generateViewId()
 
         myCard?.setOnClickListener{
@@ -256,7 +255,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         layout.addView(myTickChip)
         layout.addView(myCrossChip)
         layout.addView(myBinButton)
-        layout.addView(myRenameButton)
+        //layout.addView(myRenameButton)
         layout.addView(mySelectBox)
 
         val cardConstraintParams = ConstraintSet()
@@ -337,7 +336,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         } }
 
 
-        myRenameButton?.id?.let { mySetTitle?.id?.let { it1 ->
+        /*myRenameButton?.id?.let { mySetTitle?.id?.let { it1 ->
             cardConstraintParams.connect(it, ConstraintSet.BOTTOM,
                 it1, ConstraintSet.BOTTOM)
         } }
@@ -348,7 +347,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         myRenameButton?.id?.let { mySetTitle?.id?.let { it1 ->
             cardConstraintParams.connect(it, ConstraintSet.TOP,
                 it1, ConstraintSet.TOP)
-        } }
+        } }*/
 
         mySelectBox?.id?.let { myCrossChip?.id?.let { it1 ->
             cardConstraintParams.connect(it, ConstraintSet.BOTTOM,
@@ -388,7 +387,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             cardConstraintParams.setMargin(sets.last().id, ConstraintSet.TOP, dpToPx(8).toInt())
         }
 
-        if (myCard != null && mySetTitle != null && myTermChip != null && myDateChip != null && myTickChip != null && myCrossChip != null && myBinButton != null && myRenameButton != null) {
+        if (myCard != null && mySetTitle != null && myTermChip != null && myDateChip != null && myTickChip != null && myCrossChip != null && myBinButton != null) { //&& myRenameButton != null) {
             cardGraphics[myCard] = mySelectBox?.let { CardComponents(myTickChip,myCrossChip, it) }!!
         }
 
@@ -405,7 +404,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             layout.removeView(myTickChip)
             layout.removeView(myCrossChip)
             layout.removeView(myBinButton)
-            layout.removeView(myRenameButton)
+            //layout.removeView(myRenameButton)
             layout.removeView(mySelectBox)
 
             if (myCard == sets.last() && myCard != sets.first()) {
@@ -478,7 +477,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         currentSetDate = fragmentView.findViewById(R.id.dateChip)
         currentSetTick = fragmentView.findViewById(R.id.tickChip)
         currentSetCross = fragmentView.findViewById(R.id.crossChip)
-        currentSetRename = fragmentView.findViewById(R.id.renameButton)
+        //currentSetRename = fragmentView.findViewById(R.id.renameButton)
 
         @SuppressLint("SimpleDateFormat")
         fun addSet() {

@@ -1,5 +1,6 @@
 package com.layanjethwa.intrusiverevision
 
+import android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -11,6 +12,8 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.tabs.TabLayoutMediator
 import com.layanjethwa.intrusiverevision.databinding.LayoutBinding
 import android.content.Context
+import android.util.Log
+import android.view.accessibility.AccessibilityManager
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
@@ -22,13 +25,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         enableEdgeToEdge()
 
-        // Mark app as active
         getSharedPreferences("appRunning",0).edit().putBoolean("isActive", true).apply()
 
         checkPermissions()
         ensureAccessibilityEnabled()
 
-        // Setup fragments and tabs
         val fragments = listOf(
             FlashcardsFragment(),
             HomeFragment(),
@@ -53,9 +54,6 @@ class MainActivity : AppCompatActivity() {
         }.attach()
     }
 
-    // -----------------------
-    // Permission checks
-    // -----------------------
     private fun checkPermissions() {
         if (!Settings.canDrawOverlays(this)) {
             startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
@@ -97,19 +95,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // -----------------------
-    // AccessibilityService check
-    // -----------------------
     private fun ensureAccessibilityEnabled() {
-        val enabledServices = Settings.Secure.getString(
-            contentResolver,
-            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: "false"
+        val accessibilityManager = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val accessibilityServices = accessibilityManager.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK)
+        val accessibilityPackages = mutableListOf<String>()
+        for (info in accessibilityServices) {
+            accessibilityPackages.add(info.resolveInfo.serviceInfo.packageName)
+        }
 
-        val packageName = "$packageName/.AppMonitorService"
-
-        if (!enabledServices.contains(packageName)) {
-            // Prompt user to enable AccessibilityService
+        if (!accessibilityPackages.contains(packageName)) {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
     }
