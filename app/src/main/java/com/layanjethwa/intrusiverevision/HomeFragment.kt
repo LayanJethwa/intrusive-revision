@@ -50,7 +50,7 @@ class HomeFragment : Fragment(R.layout.home_layout) {
     private var editor = settings?.edit()
 
     private var statsType = "session"
-    private var questionType = "spaced"
+    private lateinit var questionType: String
     private val allCorrectScore = 0.1F
     private val allIncorrectScore = 10F
     private val newQuestionScore = 5F
@@ -246,6 +246,7 @@ class HomeFragment : Fragment(R.layout.home_layout) {
         val incorrectSound = MediaPlayer.create(context, R.raw.incorrect)
         val muteButton: ImageView = fragmentView.findViewById(R.id.muteButton)
         var muted = requireActivity().getSharedPreferences("globalSettings", 0)?.getBoolean("muted", false)!!
+        questionType = requireActivity().getSharedPreferences("globalSettings", 0)?.getString("questionType", "random")!!
 
         if (!muted) {
             muteButton.setImageResource(R.drawable.volume)
@@ -253,6 +254,12 @@ class HomeFragment : Fragment(R.layout.home_layout) {
         } else {
             muteButton.setImageResource(R.drawable.mute)
             muteButton.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.pastel_red))
+        }
+
+        if (questionType == "random"){
+            checkBox.isChecked = false
+        } else if (questionType == "spaced") {
+            checkBox.isChecked = true
         }
 
         muteButton.setOnClickListener {
@@ -345,7 +352,7 @@ class HomeFragment : Fragment(R.layout.home_layout) {
 
             }
             tickRightChip.text = settings?.getInt("${baseKey}--ticks",0).toString()
-            crossRightChip.text = settings?.getInt("${baseKey}--ticks",0).toString()
+            crossRightChip.text = settings?.getInt("${baseKey}--crosses",0).toString()
             termText.text = term
             definitionText.text = expected
             equalsText.text = getString(R.string.equals_text)
@@ -398,6 +405,7 @@ class HomeFragment : Fragment(R.layout.home_layout) {
             } else {
                 "random"
             }
+            this.activity?.getSharedPreferences("globalSettings", 0)?.edit()?.putString("questionType", questionType)?.apply()
         }
 
         return fragmentView

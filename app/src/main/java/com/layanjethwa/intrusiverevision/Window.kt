@@ -44,8 +44,9 @@ class Window(
     private val layoutInflater: LayoutInflater
 
 
-    private var currentSet = "NONE"
-    private var flashcards = listOf("")
+    private var selectedSets = mutableListOf<String>()
+    private var flashcards = mutableListOf<String>()
+    private var currentQuestionSetFile = ""
 
     private var fullQuestion = listOf("NONE","NONE")
     private var currentTerm = fullQuestion[0]
@@ -83,7 +84,7 @@ class Window(
     private var editor = settings?.edit()
 
     private var statsType = "session"
-    private var questionType = "spaced"
+    private var questionType = context.getSharedPreferences("globalSettings", 0).getString("questionType", "random")
     private val allCorrectScore = 0.1F
     private val allIncorrectScore = 10F
     private val newQuestionScore = 5F
@@ -178,12 +179,18 @@ class Window(
                 crossLeftChip.text = sessionCrosses.toString()
             }
         }
+        if (questionType == "random"){
+            checkBox.isChecked = false
+        } else if (questionType == "spaced") {
+            checkBox.isChecked = true
+        }
         checkBox.setOnCheckedChangeListener { _, isChecked ->
             questionType = if (isChecked) {
                 "spaced"
             } else {
                 "random"
             }
+            context.getSharedPreferences("globalSettings", 0).edit().putString("questionType", questionType).apply()
         }
         muteButton.setOnClickListener {
             if (muted) {
@@ -243,19 +250,20 @@ class Window(
                     scoreText.text = "0/$newQuestions"
                     context.getSharedPreferences("appRunning",0).edit().putBoolean("serviceActive",true).apply()
 
-                    val currentSetFile = File(context.filesDir?.path, "currentSet.txt")
-                    if (currentSetFile.exists()) {
-                        context.openFileInput("currentSet.txt").use { stream ->
-                            currentSet = stream?.bufferedReader().use {
-                                it?.readText().toString()
+                    val savedSets = settings?.getString("selectedSetsList", "") ?: ""
+                    if (savedSets.isNotBlank()) {
+                        selectedSets = savedSets.split(",").toMutableList()
+                        flashcards.clear()
+                        for (setFile in selectedSets) {
+                            val file = File(context.filesDir, setFile)
+                            if (file.exists()) {
+                                context.openFileInput(setFile).use { stream ->
+                                    val content = stream?.bufferedReader()?.readText() ?: ""
+                                    flashcards.addAll(
+                                        content.split("\n").filter { it.contains("||") && it.isNotBlank() }
+                                    )
+                                }
                             }
-                        }
-                    }
-
-                    val setFile = File(context.filesDir?.path, currentSet)
-                    if (setFile.exists() && currentSet != "NONE") {
-                        context.openFileInput(currentSet).use { stream ->
-                            flashcards = stream?.bufferedReader().use { it?.readText() ?: "ERROR" }.split("\n")
                         }
                     }
 
@@ -265,8 +273,8 @@ class Window(
 
                     sessionTicks = 0
                     sessionCrosses = 0
-                    globalTicks = settings?.getInt(currentSet.replace(".txt","--ticks"),0)!!
-                    globalCrosses = settings?.getInt(currentSet.replace(".txt","--crosses"),0)!!
+                    globalTicks = selectedSets.sumOf { settings?.getInt(it.replace(".txt", "--ticks"), 0) ?: 0 }
+                    globalCrosses = selectedSets.sumOf { settings?.getInt(it.replace(".txt", "--crosses"), 0) ?: 0 }
                     if (statsType == "session") {
                         tickLeftChip.text = "0"
                         crossLeftChip.text = "0"
@@ -308,203 +316,220 @@ class Window(
 
     @SuppressLint("SetTextI18n")
     fun validateInput(expected: String, clicked: String, term: String) {
-        if (currentSet != "NONE") {
-            if (expected == clicked) {
-                if (!muted) {
-                    correctSound.start()
-                    correctSound.pause()
-                    correctSound.seekTo(0)
-                    correctSound.start()
-                }
-                validate.setCardBackgroundColor(
-                    ContextCompat.getColor(
-                        context,
-                        R.color.pastel_green
-                    )
-                )
-                validateText.text = context.getString(R.string.correct_text)
-
-                sessionTicks ++
-                globalTicks ++
-
-                editor?.putInt("${currentSet.replace(".txt","--ticks")}--${term}--${expected}",
-                    settings?.getInt("${currentSet.replace(".txt","--ticks")}--${term}--${expected}",0)
-                        ?.plus(1) ?: 1
-                )
-
-                editor?.putInt(currentSet.replace(".txt","--ticks"),globalTicks)
-                editor?.apply()
-                if (statsType == "session") {
-                    tickLeftChip.text = sessionTicks.toString()
-                } else if (statsType == "global") {
-                    tickLeftChip.text = globalTicks.toString()
-                }
-
-                if (!closeButton.isEnabled) {
-                    remainingQuestions--
-
-                    scoreText.text = "${newQuestions - remainingQuestions}/$newQuestions"
-                    if (remainingQuestions == 0) {
-                        scoreText.setTextColor(
-                            ContextCompat.getColor(
-                                context,
-                                R.color.green
-                            )
-                        )
-                    } else if (newQuestions - remainingQuestions >= 0) {
-                        scoreText.setTextColor(ContextCompat.getColor(context, R.color.highlight))
-                    }
-                }
-
-                if (remainingQuestions == 0) {
-                    closeButton.isEnabled = true
-                    closeButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.highlight))
-                }
-
-            } else {
-                if (!muted) {
-                    incorrectSound.start()
-                    incorrectSound.pause()
-                    incorrectSound.seekTo(0)
-                    incorrectSound.start()
-                }
-                validate.setCardBackgroundColor(
-                    ContextCompat.getColor(
-                        context,
-                        R.color.pastel_red
-                    )
-                )
-                validateText.text = context.getString(R.string.incorrect_text)
-
-                sessionCrosses ++
-                globalCrosses ++
-
-                editor?.putInt("${currentSet.replace(".txt","--crosses")}--${term}--${expected}",
-                    settings?.getInt("${currentSet.replace(".txt","--crosses")}--${term}--${expected}",0)
-                        ?.plus(1) ?: 1
-                )
-
-                editor?.putInt(currentSet.replace(".txt","--crosses"),globalCrosses)
-                editor?.apply()
-                if (statsType == "session") {
-                    crossLeftChip.text = sessionCrosses.toString()
-                } else if (statsType == "global") {
-                    crossLeftChip.text = globalCrosses.toString()
-                }
-                if (!closeButton.isEnabled) {
-                    remainingQuestions += penaltyQuestions
-                    scoreText.text = "${newQuestions - remainingQuestions}/$newQuestions"
-
-                    if (newQuestions - remainingQuestions < 0) {
-                        scoreText.setTextColor(ContextCompat.getColor(context, R.color.red))
-                    } else if (newQuestions - remainingQuestions >= 0) {
-                        scoreText.setTextColor(ContextCompat.getColor(context, R.color.highlight))
-                    }
-                }
-
-            }
-            tickRightChip.text = settings?.getInt("${currentSet.replace(".txt","--ticks")}--${term}--${expected}",0).toString()
-            crossRightChip.text = settings?.getInt("${currentSet.replace(".txt","--crosses")}--${term}--${expected}",0).toString()
-            termText.text = term
-            definitionText.text = expected
-            equalsText.text = context.getString(R.string.equals_text)
+        if (selectedSets.isEmpty() || currentQuestionSetFile.isEmpty()) {
+            Toast.makeText(context, "No set selected", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        val setName = currentQuestionSetFile.replace(".txt", "")
+        val baseKey = "$setName--${term}--${expected}"
+
+        if (expected == clicked) {
+            if (!muted) {
+                correctSound.start()
+                correctSound.pause()
+                correctSound.seekTo(0)
+                correctSound.start()
+            }
+            validate.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.pastel_green
+                )
+            )
+            validateText.text = context.getString(R.string.correct_text)
+
+            sessionTicks ++
+            globalTicks ++
+
+            editor?.putInt("${baseKey}--ticks",
+                settings?.getInt("${baseKey}--ticks", 0)?.plus(1) ?: 1
+            )
+            editor?.putInt("$setName--ticks",
+                settings?.getInt("$setName--ticks", 0)?.plus(1) ?: 1
+            )
+            editor?.apply()
+
+            if (statsType == "session") {
+                tickLeftChip.text = sessionTicks.toString()
+            } else if (statsType == "global") {
+                tickLeftChip.text = globalTicks.toString()
+            }
+
+            if (!closeButton.isEnabled) {
+                remainingQuestions--
+
+                scoreText.text = "${newQuestions - remainingQuestions}/$newQuestions"
+                if (remainingQuestions == 0) {
+                    scoreText.setTextColor(
+                        ContextCompat.getColor(
+                            context,
+                            R.color.green
+                        )
+                    )
+                } else if (newQuestions - remainingQuestions >= 0) {
+                    scoreText.setTextColor(ContextCompat.getColor(context, R.color.highlight))
+                }
+            }
+
+            if (remainingQuestions == 0) {
+                closeButton.isEnabled = true
+                closeButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.highlight))
+            }
+
+        } else {
+            if (!muted) {
+                incorrectSound.start()
+                incorrectSound.pause()
+                incorrectSound.seekTo(0)
+                incorrectSound.start()
+            }
+            validate.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.pastel_red
+                )
+            )
+            validateText.text = context.getString(R.string.incorrect_text)
+
+            sessionCrosses ++
+            globalCrosses ++
+
+            editor?.putInt("${baseKey}--crosses",
+                settings?.getInt("${baseKey}--crosses", 0)?.plus(1) ?: 1
+            )
+            editor?.putInt("$setName--crosses",
+                settings?.getInt("$setName--crosses", 0)?.plus(1) ?: 1
+            )
+            editor?.apply()
+
+            if (statsType == "session") {
+                crossLeftChip.text = sessionCrosses.toString()
+            } else if (statsType == "global") {
+                crossLeftChip.text = globalCrosses.toString()
+            }
+            if (!closeButton.isEnabled) {
+                remainingQuestions += penaltyQuestions
+                scoreText.text = "${newQuestions - remainingQuestions}/$newQuestions"
+
+                if (newQuestions - remainingQuestions < 0) {
+                    scoreText.setTextColor(ContextCompat.getColor(context, R.color.red))
+                } else if (newQuestions - remainingQuestions >= 0) {
+                    scoreText.setTextColor(ContextCompat.getColor(context, R.color.highlight))
+                }
+            }
+        }
+        tickRightChip.text = settings?.getInt("${baseKey}--ticks",0).toString()
+        crossRightChip.text = settings?.getInt("${baseKey}--crosses",0).toString()
+        termText.text = term
+        definitionText.text = expected
+        equalsText.text = context.getString(R.string.equals_text)
     }
 
     private fun nextQuestion(ans: String): List<String> {
-        if (currentSet == "NONE") {
+        if (flashcards.isEmpty()) {
             Toast.makeText(
                 context,
                 "No set initialised",
                 Toast.LENGTH_LONG
             ).show()
             return listOf("NONE", "NONE")
-        } else {
-            var term = ""
-            var answer = ""
+        }
 
-            if (questionType == "random") {
+        var term = ""
+        var answer = ""
+        var currentSetFile = ""
 
-                var question = flashcards.random().split("||")
+        if (questionType == "random") {
+
+            var question = flashcards.random().split("||")
+            term = question[0]
+            answer = question[1]
+
+            currentSetFile = cardSetFor("$term||$answer")
+
+            while (("$term||$ans" in flashcards) || (term == "")) {
+                question = flashcards.random().split("||")
                 term = question[0]
                 answer = question[1]
-
-                while (("$term||$ans" in flashcards) || (term == "")) {
-                    question = flashcards.random().split("||")
-                    term = question[0]
-                    answer = question[1]
-                }
-            } else {
-                val ratios = mutableListOf<Float>()
-                for (card in flashcards) {
-                    val ticks = settings?.getInt("${currentSet.replace(".txt","--ticks")}--${card.replace("||","--")}",0)?.toFloat()
-                    val crosses = settings?.getInt("${currentSet.replace(".txt","--crosses")}--${card.replace("||","--")}",0)?.toFloat()
-                    if (crosses == 0F) {
-                        if (ticks != 0F) {
-                            ratios.add(allCorrectScore / ticks!!)
-                        } else {
-                            ratios.add(newQuestionScore)
-                        }
-                    } else if (ticks == 0F) {
-                        if (crosses != 0F) {
-                            ratios.add(allIncorrectScore)
-                        } else {
-                            ratios.add(newQuestionScore)
-                        }
-                    } else {
-                        ratios.add(crosses!! / ticks!!)
-                    }
-                }
-                val sumRatios = ratios.sum()
-                val newRatios = ratios.map { it / sumRatios}
-                var currentScore = 0F
-                val cumulativeRatios = mutableListOf<Float>()
-                for (ratio in newRatios) {
-                    currentScore += ratio
-                    cumulativeRatios.add(currentScore)
-                }
-
-                while (("$term||$ans" in flashcards) || (term == "")) {
-                    val randomScore = Random.nextFloat()
-                    var currentCard = 0
-
-                    while (randomScore > cumulativeRatios[currentCard]) {
-                        currentCard++
-                    }
-                    val question = flashcards[currentCard].split("||")
-                    term = question[0]
-                    answer = question[1]
-                }
+                currentSetFile = cardSetFor("$term||$answer")
             }
 
-            val answers = mutableListOf(answer)
-            var newAns = answer
-            for (i in 1..3) {
-                while (newAns in answers) {
-                    newAns = flashcards.random().split("||")[1]
+        } else {
+            val ratios = mutableListOf<Float>()
+            for (card in flashcards) {
+                val ticks = settings?.getInt("${cardSetFor(card)}--ticks",0)?.toFloat() // CHANGED
+                val crosses = settings?.getInt("${cardSetFor(card)}--crosses",0)?.toFloat() // CHANGED
+                if (crosses == 0F) {
+                    ratios.add(if (ticks != 0F) allCorrectScore / ticks!! else newQuestionScore)
+                } else if (ticks == 0F) {
+                    ratios.add(if (crosses != 0F) allIncorrectScore else newQuestionScore)
+                } else {
+                    ratios.add(crosses!! / ticks!!)
                 }
-                answers.add(newAns)
+            }
+            val sumRatios = ratios.sum()
+            val newRatios = ratios.map { it / sumRatios }
+            val cumulativeRatios = mutableListOf<Float>()
+            var currentScore = 0F
+            for (ratio in newRatios) {
+                currentScore += ratio
+                cumulativeRatios.add(currentScore)
             }
 
-            newAns = answers.random()
-            buttonTopLeft.text = newAns
-            answers.remove(newAns)
+            while (("$term||$ans" in flashcards) || (term == "")) {
+                val randomScore = Random.nextFloat()
+                var currentCard = 0
 
-            newAns = answers.random()
-            buttonTopRight.text = newAns
-            answers.remove(newAns)
+                while (randomScore > cumulativeRatios[currentCard]) {
+                    currentCard++
+                }
+                val question = flashcards[currentCard].split("||")
+                term = question[0]
+                answer = question[1]
+            }
 
-            newAns = answers.random()
-            buttonBottomLeft.text = newAns
-            answers.remove(newAns)
-
-            newAns = answers.random()
-            buttonBottomRight.text = newAns
-            answers.remove(newAns)
-
-            questionText.text = term
-
-            return listOf(term, answer)
+            currentSetFile = selectedSets.find { set ->
+                File(context.filesDir, set).readText().contains("$term||$answer")
+            } ?: selectedSets.firstOrNull() ?: ""
         }
+
+        val answers = mutableListOf(answer)
+        val setFlashcards = mutableListOf<String>()
+        if (currentSetFile.isNotEmpty()) {
+            val file = File(context.filesDir, currentSetFile)
+            if (file.exists()) {
+                context.openFileInput(currentSetFile).use { stream ->
+                    val lines = stream?.bufferedReader()?.readText() ?: ""
+                    if (lines.isNotEmpty()) {
+                        setFlashcards.addAll(
+                            lines.split("\n").filter { it.contains("||") && it.isNotBlank() }
+                        )
+                    }
+                }
+            }
+        }
+
+        while (answers.size < 4 && setFlashcards.isNotEmpty()) {
+            val newAns = setFlashcards.random().split("||")[1]
+            if (newAns !in answers) answers.add(newAns)
+        }
+
+        val shuffled = answers.shuffled()
+        buttonTopLeft.text = shuffled[0]
+        buttonTopRight.text = shuffled[1]
+        buttonBottomLeft.text = shuffled[2]
+        buttonBottomRight.text = shuffled[3]
+
+        questionText.text = term
+        currentQuestionSetFile = currentSetFile
+
+        return listOf(term, answer)
+    }
+
+    private fun cardSetFor(card: String): String {
+        return selectedSets.find { set ->
+            File(context.filesDir, set).readText().contains(card)
+        } ?: selectedSets.firstOrNull() ?: ""
     }
 }

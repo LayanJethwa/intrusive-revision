@@ -1,6 +1,7 @@
 package com.layanjethwa.intrusiverevision
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources.getSystem
@@ -11,6 +12,10 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.CookieManager
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
@@ -188,6 +193,12 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         mySelectBox?.buttonTintList = ContextCompat.getColorStateList(requireActivity(), R.color.highlight)
         mySelectBox?.isClickable = true
         mySelectBox?.isFocusable = true
+
+        val selectedSets = settings.getString("selectedSetsList", "") ?: ""
+        val selectedSetsList = selectedSets.split(",").filter { it.isNotBlank() }.toMutableList()
+        if (selectedSetsList.contains(setFileName)) {
+            mySelectBox?.isChecked = true
+        }
 
         val updateSelectedSetsPref: (String, Boolean) -> Unit = { file, add ->
             val selected = settings.getString("selectedSetsList", "") ?: ""
@@ -393,51 +404,69 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         }
 
         myBinButton?.setOnClickListener {
-            File(context?.filesDir, setFileName).delete()
+            fun deleteSet(){
+                File(context?.filesDir, setFileName).delete()
 
-            val changeCardConstraintParams = ConstraintSet()
-            changeCardConstraintParams.clone(layout)
+                val changeCardConstraintParams = ConstraintSet()
+                changeCardConstraintParams.clone(layout)
 
-            layout.removeView(myCard)
-            layout.removeView(mySetTitle)
-            layout.removeView(myTermChip)
-            layout.removeView(myDateChip)
-            layout.removeView(myTickChip)
-            layout.removeView(myCrossChip)
-            layout.removeView(myBinButton)
-            //layout.removeView(myRenameButton)
-            layout.removeView(mySelectBox)
+                layout.removeView(myCard)
+                layout.removeView(mySetTitle)
+                layout.removeView(myTermChip)
+                layout.removeView(myDateChip)
+                layout.removeView(myTickChip)
+                layout.removeView(myCrossChip)
+                layout.removeView(myBinButton)
+                //layout.removeView(myRenameButton)
+                layout.removeView(mySelectBox)
 
-            if (myCard == sets.last() && myCard != sets.first()) {
-                val cardChanged = sets[sets.size-2]
-                changeCardConstraintParams.clear(cardChanged.id, ConstraintSet.TOP)
-                changeCardConstraintParams.connect(cardChanged.id, ConstraintSet.TOP,
-                    R.id.currentSet, ConstraintSet.BOTTOM)
-                changeCardConstraintParams.setMargin(cardChanged.id, ConstraintSet.TOP, dpToPx(32).toInt())
-            } else if (myCard != sets.first()) {
-                val delIndex = sets.indexOf(myCard)
-                changeCardConstraintParams.clear(sets[delIndex-1].id, ConstraintSet.TOP)
-                changeCardConstraintParams.connect(sets[delIndex-1].id, ConstraintSet.TOP, sets[delIndex+1].id, ConstraintSet.BOTTOM)
-                changeCardConstraintParams.setMargin(sets[delIndex-1].id, ConstraintSet.TOP, dpToPx(8).toInt())
-            }
-
-            sets.remove(myCard)
-            setFileNames.remove(myCard)
-
-            if (mySetTitle?.text == currentSetTitle.text) {
-                currentSetTitle.text = ""
-                currentSetDate.text = ""
-                currentSetTerms.text = ""
-                currentSetCross.text = ""
-                currentSetTick.text = ""
-                val thisCurrentSetFile = File(context?.filesDir?.path, "currentSet.txt")
-                if (thisCurrentSetFile.exists()) {
-                    thisCurrentSetFile.delete()
+                if (myCard == sets.last() && myCard != sets.first()) {
+                    val cardChanged = sets[sets.size-2]
+                    changeCardConstraintParams.clear(cardChanged.id, ConstraintSet.TOP)
+                    changeCardConstraintParams.connect(cardChanged.id, ConstraintSet.TOP,
+                        R.id.currentSet, ConstraintSet.BOTTOM)
+                    changeCardConstraintParams.setMargin(cardChanged.id, ConstraintSet.TOP, dpToPx(32).toInt())
+                } else if (myCard != sets.first()) {
+                    val delIndex = sets.indexOf(myCard)
+                    changeCardConstraintParams.clear(sets[delIndex-1].id, ConstraintSet.TOP)
+                    changeCardConstraintParams.connect(sets[delIndex-1].id, ConstraintSet.TOP, sets[delIndex+1].id, ConstraintSet.BOTTOM)
+                    changeCardConstraintParams.setMargin(sets[delIndex-1].id, ConstraintSet.TOP, dpToPx(8).toInt())
                 }
+
+                sets.remove(myCard)
+                setFileNames.remove(myCard)
+
+                if (mySetTitle?.text == currentSetTitle.text) {
+                    currentSetTitle.text = ""
+                    currentSetDate.text = ""
+                    currentSetTerms.text = ""
+                    currentSetCross.text = ""
+                    currentSetTick.text = ""
+                    val thisCurrentSetFile = File(context?.filesDir?.path, "currentSet.txt")
+                    if (thisCurrentSetFile.exists()) {
+                        thisCurrentSetFile.delete()
+                    }
+                }
+
+                changeCardConstraintParams.applyTo(layout)
+                layout.requestLayout()
             }
 
-            changeCardConstraintParams.applyTo(layout)
-            layout.requestLayout()
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle("Delete set")
+            builder.setMessage("Confirm delete of set \"$title\"?")
+            builder.setPositiveButton("Confirm") { _, _ ->
+                deleteSet()
+                Toast.makeText(context,
+                    "Set deleted", Toast.LENGTH_SHORT).show()
+            }
+            builder.setNegativeButton("Cancel") { _, _ ->
+                Toast.makeText(context,
+                    "Set not deleted", Toast.LENGTH_SHORT).show()
+            }
+            builder.show()
+
+
         }
 
         mySelectBox?.setOnTouchListener { _, event ->
@@ -457,6 +486,94 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             setFileNames[myCard] = setFileName
         }
 
+    }
+
+    private fun loadQuizlet(url: String, onResult: (String) -> Unit) {
+        val prefs = requireContext().getSharedPreferences("cookies", Context.MODE_PRIVATE)
+
+        val webView = WebView(requireContext())
+        webView.layoutParams = ViewGroup.LayoutParams(1, 1)
+        webView.visibility = View.INVISIBLE
+
+        val settings = webView.settings
+        settings.javaScriptEnabled = true
+        settings.domStorageEnabled = true
+        settings.databaseEnabled = true
+        settings.cacheMode = WebSettings.LOAD_DEFAULT
+        settings.javaScriptCanOpenWindowsAutomatically = true
+        settings.loadsImagesAutomatically = true
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+
+        settings.userAgentString =
+            "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 " +
+                    "(KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
+
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setAcceptCookie(true)
+        cookieManager.setAcceptThirdPartyCookies(webView, true)
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, pageUrl: String?) {
+                if (pageUrl == null) return
+
+                val cookies = cookieManager.getCookie("https://quizlet.com") ?: ""
+
+                prefs.edit().putString("quizlet", cookies).apply()
+
+                if (cookies.isBlank()) {
+                    return
+                }
+
+                Thread {
+                    try {
+                        val html = Jsoup.connect(url)
+                            .userAgent("Mozilla/5.0 (Linux; Android 13)")
+                            .header("Cookie", cookies)
+                            .timeout(15000)
+                            .maxBodySize(0)
+                            .get()
+                            .toString()
+
+                        requireActivity().runOnUiThread {
+                            onResult(html)
+                        }
+                    } catch (e: Exception) {
+                        requireActivity().runOnUiThread {
+                            onResult("ERROR")
+                        }
+                    }
+                }.start()
+            }
+        }
+
+        webView.loadUrl("https://quizlet.com/")
+    }
+
+    private fun saveSetToFile(title: String, cards: List<Pair<String, String>>) {
+        val date =SimpleDateFormat("dd/MM/yy", Locale.UK).format(Calendar.getInstance().time)
+        val fileDate =SimpleDateFormat("yyMMdd", Locale.UK).format(Calendar.getInstance().time)
+        val terms = cards.size
+
+        val fileName = "$fileDate--$title.txt"
+        val file = File(context?.filesDir, fileName)
+        if (file.exists()) file.delete()
+
+        activity?.applicationContext?.openFileOutput(fileName, Context.MODE_PRIVATE)
+            .use { out ->
+                for (card in cards) {
+                    if (card != cards.last()) {
+                        out?.write("${card.first}||${card.second}\n".toByteArray())
+                    } else {
+                        out?.write("${card.first}||${card.second}".toByteArray())
+                    }
+                }
+            }
+
+        requireActivity().runOnUiThread {
+            addCard(date, title, terms, fileName, border = true)
+            setCurrentSet(fileName)
+            Toast.makeText(context, "Set initialized", Toast.LENGTH_LONG).show()
+        }
     }
 
     @SuppressLint("UseRequireInsteadOfGet")
@@ -480,7 +597,7 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
         currentSetCross = fragmentView.findViewById(R.id.crossChip)
         //currentSetRename = fragmentView.findViewById(R.id.renameButton)
 
-        @SuppressLint("SimpleDateFormat")
+        @SuppressLint("SimpleDateFormat", "SetJavaScriptEnabled")
         fun addSet() {
             requireActivity().runOnUiThread {
                 Toast.makeText(
@@ -491,80 +608,48 @@ class FlashcardsFragment: Fragment(R.layout.flashcards_layout) {
             }
 
             val url = inputText.text.toString()
-            Thread {
-                val cards: List<Pair<String, String>>
-                val title: String
-                if (url.contains("quizlet.com")) {
-                    val doc: String = try {
-                        Jsoup.connect(url)
-                            .maxBodySize(0)
-                            .timeout(0)
-                            .userAgent("Mozilla/5.0")
-                            .get().toString()
-                    } catch (e: Exception) {
-                        "ERROR"
+
+            if (url.contains("quizlet.com")) {
+                loadQuizlet(url) { result ->
+                    if (result == "ERROR") {
+                        Toast.makeText(context, "Connection error", Toast.LENGTH_LONG).show()
+                        return@loadQuizlet
                     }
 
-                    if (doc == "ERROR") {
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(context, "Connection error", Toast.LENGTH_LONG).show()
+                    Thread {
+                        val cards =
+                            Regex("""\\"label\\":\\"(?:word|definition)\\",\\"media\\":\[\{\\"type\\":1,\\"plainText\\":\\"(.+?)\\""")
+                                .findAll(result)
+                                .map { it.groups[1]?.value ?: "" }.toList().chunked(2)
+                                .map { it[0] to it[1] }
+                        if (cards.isEmpty()) {
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(
+                                    context,
+                                    "Invalid or empty Quizlet set",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            return@Thread
                         }
-                        return@Thread
-                    }
 
-                    cards =
-                        Regex("""\\"label\\":\\"(?:word|definition)\\",\\"media\\":\[\{\\"type\\":1,\\"plainText\\":\\"(.+?)\\""").findAll(
-                            doc
-                        ).map { it.groups[1]?.value ?: "" }.toList().chunked(2).map { it[0] to it[1] }
-                    if (cards.isEmpty()) {
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(
-                                context,
-                                "Invalid or empty Quizlet set",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                        return@Thread
-                    }
+                        val titleMatch = Regex("""<title.*>(.+?) Flashcards""").find(result)
+                        val title = titleMatch?.groups?.get(1)?.value ?: "Untitled Set"
 
-                    val titleMatch = Regex("""<title.*>(.+?) Flashcards""").find(doc)
-                    title = titleMatch?.groups?.get(1)?.value ?: "Untitled Set"
-                } else {
-                    val match = Regex("""(.+?)\|((?:.+?<.+?>)+)""").findAll(url).toList()[0]
-                    title = match.groups[1]?.value ?: "Untitled Set"
-                    cards = Regex("(.+?)<(.+?)>").findAll(match.groups[2]?.value ?: "term").map {
-                        pair ->
+                        saveSetToFile(title, cards)
+                    }.start()
+                }
+            } else {
+                val match = Regex("""(.+?)\|((?:.+?<.+?>)+)""").findAll(url).toList()[0]
+                val title = match.groups[1]?.value ?: "Untitled Set"
+                val cards = Regex("(.+?)<(.+?)>").findAll(match.groups[2]?.value ?: "term")
+                    .map { pair ->
                         val term = pair.groups[1]?.value ?: ""
                         val def = pair.groups[2]?.value ?: ""
                         term to def
                     }.toList()
-                }
-
-                val date = SimpleDateFormat("dd/MM/yy", Locale.UK).format(Calendar.getInstance().time)
-                val fileDate = SimpleDateFormat("yyMMdd", Locale.UK).format(Calendar.getInstance().time)
-                val terms = cards.size
-
-                val fileName = "$fileDate--$title.txt"
-                val file = File(context?.filesDir, fileName)
-                if (file.exists()) file.delete()
-
-                activity?.applicationContext?.openFileOutput(fileName, Context.MODE_PRIVATE).use { out ->
-                    for (card in cards) {
-                        if (card != cards.last()) {
-                            out?.write("${card.first}||${card.second}\n".toByteArray())
-                        } else {
-                            out?.write("${card.first}||${card.second}".toByteArray())
-                        }
-                    }
-                }
-
-                requireActivity().runOnUiThread {
-                    addCard(date, title, terms, fileName, border = true)
-                    setCurrentSet(fileName)
-                    Toast.makeText(context, "Set initialized", Toast.LENGTH_LONG).show()
-                }
-
-            }.start()
+                saveSetToFile(title, cards)
+            }
         }
 
         inputBox.setEndIconOnClickListener{
